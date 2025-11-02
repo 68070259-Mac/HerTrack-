@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard - บันทึกประจำเดือน V5.3</title>
+  
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+  <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"> <style>
+    @keyframes slideUpFadeIn {
+      from { opacity: 0; transform: translateY(15px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    body {
+      font-family: 'Nunito Sans', sans-serif;
+      background: linear-gradient(180deg, #FAFDFF 0%, #FFF6F8 100%);
+      color: #333; margin: 0; padding: 16px;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    h1 {
+      color: #FB6A90; text-align: center;
+      text-shadow: 0 2px 4px rgba(251, 106, 144, 0.1);
+    }
+    #calendar-container {
+      max-width: 900px; margin: 0 auto 20px auto;
+      background: #fff; border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(251, 106, 144, 0.08);
+      padding: 20px;
+    }
+    
+    /* --- ⭐️ (ใหม่!) ตกแต่ง Header ของปฏิทิน ⭐️ --- */
+    
+    /* 1. สไตล์ชื่อเดือน (ฟอนต์สวยๆ) */
+    .fc-toolbar-title {
+      font-family: 'Nunito Sans', sans-serif;
+      font-weight: 800 !important; /* ⭐️ ใช้ 800 (Extra Bold) */
+      font-size: 2rem !important;   /* ⭐️ เพิ่มขนาด */
+      color: #FB6A90; /* ⭐️ สีชมพูหลัก */
+      text-shadow: 0 2px 4px rgba(251, 106, 144, 0.1);
+    }
+
+    /* 2. สไตล์ปุ่ม (ฐาน) - ล้างค่าเดิมของ FullCalendar */
+    .fc-button {
+      background: none !important;
+      border: 2px solid #fde0e6 !important; /* ⭐️ ขอบสีชมพูอ่อน */
+      color: #FB6A90 !important; /* ⭐️ สีไอคอน/ข้อความ */
+      border-radius: 12px !important; /* ⭐️ ขอบมน */
+      box-shadow: none !important;
+      transition: all 0.2s ease-out !important;
+      font-weight: 700 !important;
+      padding: 0.5em 0.8em !important;
+      text-transform: capitalize !important; /* ทำให้ตัวอักษร 'today' สวยขึ้น */
+    }
+
+    /* 3. สไตล์ปุ่ม 'Today' (ให้เด่น) */
+    .fc-today-button {
+      background: #FB6A90 !important;
+      color: white !important;
+      border-color: #FB6A90 !important;
+      box-shadow: 0 2px 5px rgba(251, 106, 144, 0.3) !important;
+    }
+
+    /* 4. สไตล์ Hover (ปุ่ม Prev/Next) */
+    .fc-button:not(:disabled):not(.fc-today-button):hover {
+      background: #fff0f4 !important; /* ⭐️ พื้นหลังชมพูอ่อนมาก */
+      color: #FB6A90 !important;
+      transform: translateY(-2px);
+    }
+    
+    /* 5. สไตล์ Hover (ปุ่ม Today) */
+    .fc-today-button:not(:disabled):hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(251, 106, 144, 0.4) !important;
+    }
+
+    /* 6. สไตล์ปุ่มตอน Disable */
+    .fc-button:disabled {
+      opacity: 0.4 !important;
+    }
+    
+    /* 7. จัดระยะห่างระหว่างกลุ่มปุ่ม */
+    .fc-header-toolbar {
+        align-items: center; /* ⭐️ จัดให้อยู่กลางแนวตั้ง */
+        padding: 10px 0;
+    }
+
+    /* --- ⭐️ สิ้นสุดการตกแต่ง Header --- */
+
+
+    /* (CSS ส่วนที่เหลือเหมือนเดิม) */
+    .fc-daygrid-day:not(.fc-day-other) {
+      cursor: pointer;
+      transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+    }
+    .fc-daygrid-day:not(.fc-day-other):hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 16px rgba(251, 106, 144, 0.15);
+      z-index: 10; background: #fff;
+    }
+    .fc-event {
+      border: none !important; border-radius: 8px !important;
+      padding: 4px 8px !important; font-weight: 600 !important;
+      font-size: 0.85rem !important;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    #log-section {
+      max-width: 900px; margin: 0 auto;
+      background: white; border-radius: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      padding: 24px; display: none;
+      animation: slideUpFadeIn 0.5s ease-out forwards;
+    }
+    h2.selected-date {
+      font-size: 1.5rem; font-weight: 800; color: #FB6A90;
+      text-align: center; margin-bottom: 20px;
+      border-bottom: 2px dashed #fde0e6; padding-bottom: 15px;
+    }
+    .section-title {
+      font-weight: 700; color: #286BA9; font-size: 1.1rem;
+      margin-bottom: 10px; border-left: 4px solid #B0D3F2; padding-left: 8px;
+    }
+    .mood-container, .symptom-container, .flow-container, .color-container {
+      display: flex; flex-wrap: wrap; gap: 10px;
+    }
+    .mood, .symptom, .flow, .color-option {
+      flex: 1 1 calc(33.33% - 10px); text-align: center;
+      border: 2px solid #B0D3F2; border-radius: 14px;
+      padding: 12px; background: #FAFDFF; cursor: pointer;
+      font-weight: 600; transition: all 0.25s ease;
+    }
+    .mood:hover, .symptom:hover, .flow:hover, .color-option:hover {
+      transform: scale(1.03);
+    }
+    .active {
+      background-color: #FB6A90 !important; color: white !important;
+      border-color: #FB6A90 !important;
+      box-shadow: 0 4px 10px rgba(251, 106, 144, 0.3);
+      transform: scale(1.02);
+    }
+    textarea {
+      width: 100%; border-radius: 12px; border: 1.5px solid #B0D3F2;
+      padding: 12px; font-family: inherit; font-size: 1rem;
+      resize: vertical; margin-top: 10px; box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+    textarea:focus {
+      outline: none; border-color: #FB6A90;
+      box-shadow: 0 0 0 3px rgba(251, 106, 144, 0.2);
+    }
+    button {
+      width: 100%; padding: 14px;
+      color: white; font-weight: 700; border: none; border-radius: 12px;
+      cursor: pointer; font-size: 1.1rem; margin-top: 10px;
+      transition: all 0.2s ease-out;
+    }
+    #saveButton {
+      background: linear-gradient(90deg, #FB6A90, #FE0C21);
+    }
+    .back-button {
+      display: block; width: 100%; padding: 14px;
+      background: linear-gradient(90deg, #B0D3F2, #79b7eb);
+      color: white; font-weight: 700; border: none; border-radius: 12px;
+      cursor: pointer; font-size: 1.1rem; text-align: center;
+      text-decoration: none; margin-top: 10px; box-sizing: border-box;
+      transition: all 0.2s ease-out;
+    }
+    #saveButton:hover, .back-button:hover {
+      opacity: 0.9; transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+  </style>
+</head>
+<body>
+
+  <h1>🩷 Dashboard สุขภาพรอบเดือน (V5.3)</h1>
+
+  <div id="calendar-container">
+    <div id="calendar"></div>
+  </div>
+
+  <div id="log-section">
+    <h2 class="selected-date" id="selected-date-title">กรุณาเลือกวันที่จากปฏิทิน</h2>
+
+    <div class="card">
+      <div class="section-title">อารมณ์วันนี้เป็นอย่างไร?</div>
+      <div class="mood-container">
+        <div class="mood" data-value="😊 ร่าเริง">😊 ร่าเริง</div>
+        <div class="mood" data-value="😴 อ่อนเพลีย">😴 อ่อนเพลีย</div>
+        <div class="mood" data-value="😢 เศร้า">😢 เศร้า</div>
+        <div class="mood" data-value="😣 เครียด">😣 เครียด</div>
+        <div class="mood" data-value="⚡ กระปรี้กระเปร่า">⚡ กระปรี้กระเปร่า</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">มีอาการอะไรบ้าง</div>
+      <div class="symptom-container">
+        <div class="symptom" data-value="⚡ ปวดท้อง">⚡ ปวดท้อง</div>
+        <div class="symptom" data-value="☕ ปวดหัว">☕ ปวดหัว</div>
+        <div class="symptom" data-value="💤 เหนื่อย">💤 เหนื่อย</div>
+        <div class="symptom" data-value="💧 ท้องอืด">💧 ท้องอืด</div>
+        <div class="symptom" data-value="🧡 เจ็บหน้าอก">🧡 เจ็บหน้าอก</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">ปริมาณประจำเดือนวันนี้</div>
+      <div class="flow-container">
+        <div class="flow" data-value="น้อย">น้อย</div>
+        <div class="flow" data-value="ปานกลาง">ปานกลาง</div>
+        <div class="flow" data-value="มาก">มาก</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="section-title">สีของประจำเดือน</div>
+      <div class="color-container">
+        <div class="color-option" data-value="แดงสด">🔴 แดงสด</div>
+        <div class="color-option" data-value="ชมพู">🌸 ชมพู</div>
+        <div class="color-option" data-value="ส้ม">🧡 ส้ม</div>
+        <div class="color-option" data-value="แดงเข้มหรือน้ำตาล">🤎 แดงเข้มหรือน้ำตาล</div>
+        <div class="color-option" data-value="เขียวปนเทา">💚 เขียวปนเทา</div>
+        <div class="color-option" data-value="ดำคล้ำ">⚫ ดำคล้ำ</div>
+      </div>
+    </div>
+    
+    <div class="card">
+      <div class="section-title">บันทึกเพิ่มเติม (ถ้ามี)</div>
+      <textarea id="notes" placeholder="..."></textarea>
+    </div>
+
+    <button id="saveButton">💾 บันทึกข้อมูล</button>
+    <a href="/" class="back-button">🏠 กลับหน้าหลัก</a>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function() {
+      const calendarEl = document.getElementById('calendar');
+      const logSection = document.getElementById('log-section');
+      const dateTitle = document.getElementById('selected-date-title');
+      const saveButton = document.getElementById('saveButton');
+      let selectedDateStr = null;
+
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'th',
+        height: "auto",
+        events: '/api/get-events', 
+        
+        dateClick: function(info) {
+          selectedDateStr = info.dateStr;
+          const d = new Date(info.dateStr);
+          const formattedDate = d.toLocaleString("th-TH", {
+            year: 'numeric', month: 'long', day: 'numeric'
+          });
+          dateTitle.textContent = `บันทึกข้อมูลวันที่ ${formattedDate}`;
+
+          fetch(`/api/analyze?date=${selectedDateStr}`)
+            .then(res => res.json())
+            .then(data => {
+              clearSelections(); 
+              if (data.status === 'success') {
+                populateForm(data);
+              } 
+              logSection.style.display = 'block';
+            })
+            .catch(err => {
+              console.error("Error fetching data:", err);
+              clearSelections();
+              logSection.style.display = 'block';
+            });
+        }
+      });
+      calendar.render();
+
+      function clearSelections() {
+        document.querySelectorAll('.mood.active, .symptom.active, .flow.active, .color-option.active')
+          .forEach(el => el.classList.remove('active'));
+        document.getElementById('notes').value = '';
+      }
+      
+      function populateForm(data) {
+        if (data.mood) {
+          document.querySelector(`.mood[data-value="${data.mood}"]`)?.classList.add('active');
+        }
+        if (data.symptoms && data.symptoms.length > 0) {
+          data.symptoms.forEach(symptomValue => {
+            if (symptomValue) { 
+              document.querySelector(`.symptom[data-value="${symptomValue}"]`)?.classList.add('active');
+            }
+          });
+        }
+        if (data.flow) {
+          document.querySelector(`.flow[data-value="${data.flow}"]`)?.classList.add('active');
+        }
+        if (data.color) {
+          document.querySelector(`.color-option[data-value="${data.color}"]`)?.classList.add('active');
+        }
+        document.getElementById('notes').value = data.notes || '';
+      }
+
+      setupToggle('.symptom', false);
+      setupToggle('.mood', true);
+      setupToggle('.flow', true);
+      setupToggle('.color-option', true);
+
+      function setupToggle(selector, isSingle) {
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(el => {
+          el.addEventListener('click', () => {
+            if (isSingle) {
+              elements.forEach(e => e.classList.remove('active'));
+              el.classList.add('active');
+            } else {
+              el.classList.toggle('active');
+            }
+          });
+        });
+      }
+
+      saveButton.addEventListener('click', () => {
+        if (!selectedDateStr) return alert('เกิดข้อผิดพลาด: ไม่ได้เลือกวันที่');
+        
+        const mood = document.querySelector('.mood.active')?.dataset.value || null;
+        const symptoms = Array.from(document.querySelectorAll('.symptom.active')).map(el => el.dataset.value);
+        const flow = document.querySelector('.flow.active')?.dataset.value || null;
+        const color = document.querySelector('.color-option.active')?.dataset.value || null;
+        const notes = document.getElementById('notes').value;
+        
+        const dailyData = { date: selectedDateStr, mood, symptoms, flow, color, notes };
+
+        fetch('/api/save-log', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(dailyData),
+        })
+        .then(r => r.json())
+        .then(data => {
+          if (data.status === 'success') {
+            calendar.removeAllEventSources(); 
+            calendar.addEventSource(data.new_events);
+            calendar.refetchEvents();
+            window.location.href = `/show_result?date=${selectedDateStr}`;
+          } else alert('บันทึกไม่สำเร็จ: ' + data.message);
+        })
+        .catch(() => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'));
+      });
+    });
+  </script>
+</body>
+</html>

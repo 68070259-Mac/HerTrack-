@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💖 ผลการวิเคราะห์ (V5.0)</title>
+  
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    /* (คัดลอก CSS ทั้งหมดจาก result.html V1 มาวางที่นี่) */
+    :root {
+      --bg-gradient: linear-gradient(180deg, #FFF9FB 0%, #FFF5F7 100%);
+      --card-bg: #FFFFFF;
+      --main-color: #FB6A90; 
+      --soft-color: #FFB6C1; 
+      --shadow-color: rgba(251, 106, 144, 0.1);
+      --text-dark: #444;
+      --text-light: #555;
+    }
+    body {
+      font-family: 'Nunito Sans', sans-serif;
+      background: var(--bg-gradient); 
+      color: var(--text-dark);
+      margin: 0; padding: 16px; min-height: 100vh;
+    }
+    #preloader {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: var(--bg-gradient);
+      display: flex; flex-direction: column; justify-content: center;
+      align-items: center; z-index: 100; transition: opacity 0.5s ease;
+    }
+    .heart-animation { font-size: 80px; animation: heartBeat 1.3s ease-in-out infinite; }
+    @keyframes heartBeat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.15); } }
+    #encouragement {
+      font-size: 1.2rem; font-weight: 600; color: var(--main-color); 
+      margin-top: 20px; text-align: center;
+    }
+    #main-card {
+      background: var(--card-bg); border-radius: 24px;
+      box-shadow: 0 6px 20px var(--shadow-color); 
+      padding: 24px; max-width: 600px; margin: 0 auto 20px;
+      visibility: hidden; /* ซ่อนไว้ก่อน */
+    }
+    @keyframes popIn {
+      from { opacity: 0; transform: translateY(20px) scale(0.95); }
+      to { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    h1 {
+      font-size: 1.8rem; font-weight: 800; color: var(--main-color); 
+      text-align: center; margin-bottom: 20px;
+    }
+    .section-title {
+      font-weight: 700; margin: 20px 0 10px;
+      font-size: 1.15rem;
+    }
+    p { line-height: 1.7; font-size: 1rem; color: var(--text-light); }
+    .health-score-section {
+      text-align: center; padding-bottom: 10px;
+      border-bottom: 2px dashed #FCE4EC; 
+    }
+    #mascot-display { font-size: 5rem; margin-bottom: 10px; }
+    .progress-bar-container {
+      width: 100%; background: #F8F8F8; border-radius: 20px;
+      height: 20px; margin-top: 10px; overflow: hidden;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+    .progress-bar {
+      height: 100%; width: 0; 
+      background: linear-gradient(90deg, #FF8FAB, #FB6A90); 
+      border-radius: 20px;
+      transition: width 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+    }
+    .score-text {
+      font-size: 1.3rem; font-weight: 800;
+      color: var(--main-color); margin-top: 8px;
+    }
+    #self-care-section, #doctor-section {
+      display: none; /* ซ่อนไว้ก่อน */
+      border-radius: 12px; padding: 12px 16px; margin-top: 20px;
+    }
+    #self-care-section {
+      background-color: #FFFDF5; border: 2px solid #FBEAB8;
+    }
+    #self-care-section .section-title { color: #E6A23C; border-color: #FBEAB8; }
+    #doctor-section {
+      background-color: #FFF0F3; border: 2px dashed var(--soft-color); 
+    }
+    #doctor-section .section-title { color: var(--main-color); border: none; }
+    .back-button {
+      display: block; width: 100%; padding: 14px;
+      background: linear-gradient(90deg, #FF8FAB, #FB6A90); 
+      color: white; font-weight: 700; border: none; border-radius: 12px;
+      cursor: pointer; font-size: 1.1rem; text-align: center;
+      text-decoration: none; margin-top: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <div id="preloader">
+    <div class="heart-animation">💖</div>
+    <p id="encouragement">กำลังดึงข้อมูลวิเคราะห์...</p>
+  </div>
+  
+  <div class="card" id="main-card">
+    <h1>💖 ผลการวิเคราะห์</h1>
+
+    <div class="health-score-section">
+      <div id="mascot-display">...</div>
+      <h2 class="section-title" style="color: #FB6A90; border: none; text-align: center;">คะแนนสุขภาพวันนี้</h2>
+      <div class="progress-bar-container">
+        <div class="progress-bar" id="health-progress"></div>
+      </div>
+      <p class="score-text"><span id="health-score">0</span> / 100</p>
+    </div>
+
+    <div class="section" id="self-care-section">
+      <h2 class="section-title">🌸 เคล็ดลับดูแลตัวเอง</h2>
+      <p id="self-care-tip"></p>
+    </div>
+
+    <div class="section" id="doctor-section">
+      <h2 class="section-title">👩‍⚕️ คำแนะนำ (ถ้ามี)</h2>
+      <p id="doctor-advice"></p>
+    </div>
+
+    <a href="/" class="back-button">กลับไปหน้าปฏิทิน</a>
+  </div>
+
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      // 1. ดึง Element ต่างๆ
+      const preloader = document.getElementById('preloader');
+      const mainCard = document.getElementById('main-card');
+      const encouragementEl = document.getElementById('encouragement');
+      const mascotEl = document.getElementById('mascot-display');
+      const healthScoreEl = document.getElementById('health-score');
+      const healthProgressEl = document.getElementById('health-progress');
+      const selfCareTipEl = document.getElementById('self-care-tip');
+      const selfCareSectionEl = document.getElementById('self-care-section');
+      const doctorAdviceEl = document.getElementById('doctor-advice');
+      const doctorSectionEl = document.getElementById('doctor-section');
+
+      // 2. (ใหม่!) หาวันที่ (date) จาก URL
+      // (เช่น /show_result?date=2025-11-01)
+      const params = new URLSearchParams(window.location.search);
+      const date = params.get('date');
+
+      if (!date) {
+        // ถ้าไม่มี date ใน URL, แสดงข้อผิดพลาด
+        encouragementEl.textContent = '❌ ไม่พบวันที่! กรุณากลับไปบันทึกก่อนค่ะ';
+        return;
+      }
+
+      // 3. (ใหม่!) ยิง API ไปที่ /api/analyze เพื่อดึงข้อมูลของวันนั้น
+      fetch(`/api/analyze?date=${date}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data.status === 'success') {
+            // 4. (ใหม่!) เมื่อได้ข้อมูล JSON, นำมาแสดงผล
+            mascotEl.textContent = data.mascot;
+            healthScoreEl.textContent = data.health_score;
+            // หน่วงเวลาเล็กน้อยเพื่อให้เห็น animation
+            setTimeout(() => {
+                healthProgressEl.style.width = data.health_score + '%';
+            }, 100);
+
+            selfCareTipEl.innerHTML = data.self_care_tip;
+            selfCareSectionEl.style.display = 'block';
+
+            if (data.doctor_advice && data.doctor_advice.length > 0) {
+              let adviceHtml = "<ul>";
+              data.doctor_advice.forEach(item => { adviceHtml += `<li>${item}</li>`; });
+              adviceHtml += "</ul><br><i style='font-size: 0.9em; color: #777;'>*นี่เป็นเพียงคำแนะนำเบื้องต้น ไม่สามารถใช้แทนการวินิจฉัยจากแพทย์ได้</i>";
+              doctorAdviceEl.innerHTML = adviceHtml;
+              doctorSectionEl.style.display = 'block';
+            }
+
+            // 5. ซ่อน Preloader และแสดงการ์ด
+            preloader.style.opacity = '0';
+            preloader.style.pointerEvents = 'none';
+            mainCard.style.visibility = 'visible';
+            mainCard.style.animation = 'popIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
+
+          } else {
+            // (ถ้าไม่พบข้อมูลของวันนั้น)
+            encouragementEl.textContent = `❌ ไม่พบข้อมูลของวันที่ ${date}`;
+          }
+        })
+        .catch(() => {
+          encouragementEl.textContent = '❌ ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ (Analyze) ได้';
+        });
+    });
+  </script>
+</body>
+</html>
