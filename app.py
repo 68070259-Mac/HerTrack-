@@ -1,8 +1,8 @@
-# 📄 app.py (V5.4 - Auto Cycle Calculation)
+# 📄 app.py (V5.4 - Auto Cycle Calculation, Home page enabled)
 
 import os
 import datetime
-from datetime import timedelta # ⭐️ (1) Import timedelta เข้ามา
+from datetime import timedelta 
 from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 
@@ -10,6 +10,7 @@ app = Flask(__name__)
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 # --- Database Config (เหมือนเดิม) ---
+# NOTE: Using PostgreSQL for Vercel deployment
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:npg_mNkRXfiBvw62@ep-red-feather-a1w1jljl-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
@@ -30,7 +31,7 @@ class CycleHistory(db.Model):
     ovulation_date = db.Column(db.String(100))
     next_date = db.Column(db.String(100))
 
-# --- ⭐️ (2) ฟังก์ชันใหม่สำหรับคำนวณรอบเดือน ⭐️ ---
+# --- ฟังก์ชันสำหรับคำนวณรอบเดือน ---
 def update_cycle_history(current_date_str):
     """
     ตรวจสอบและอัปเดตตาราง CycleHistory โดยอัตโนมัติ
@@ -77,13 +78,13 @@ def update_cycle_history(current_date_str):
             db.session.commit()
             print(f"✅ ตรวจพบรอบเดือนใหม่! บันทึกประวัติรอบเดือน เริ่มวันที่ {new_start_date}")
         else:
-            # ถ้าไม่ใช่วันเริ่มรอบใหม่ (เช่น เป็นวันที่ 2, 3 ของรอบเดิม) ก็ไม่ต้องทำอะไร
+            # ถ้าไม่ใช่วันเริ่มรอบใหม่ ก็ไม่ต้องทำอะไร
             print(f"ℹ️ บันทึกวันที่มีประจำเดือน {current_date_str} (ไม่ใช่การเริ่มรอบใหม่)")
 
     except Exception as e:
         print(f"❌ เกิดข้อผิดพลาดในการอัปเดต CycleHistory: {e}")
         db.session.rollback() # ย้อนกลับถ้ามีปัญหา
-# --- ⭐️ สิ้นสุดฟังก์ชันใหม่ ⭐️ ---
+# --- สิ้นสุดฟังก์ชันใหม่ ---
 
 
 # --- API บันทึกข้อมูล (อัปเดต) ---
@@ -97,12 +98,12 @@ def save_log():
     symptoms_text = ",".join(data.get('symptoms', []))
     log = DailyLog.query.filter_by(log_date=log_date).first()
     
-    current_flow = data.get('flow') # ⭐️ (3) ดึงค่า flow มาเก็บไว้
+    current_flow = data.get('flow') 
 
     if log:
         log.mood = data.get('mood')
         log.symptoms = symptoms_text
-        log.flow = current_flow # ⭐️ (3) ใช้ค่า flow ที่ดึงมา
+        log.flow = current_flow 
         log.color = data.get('color')
         log.notes = data.get('notes')
         message = "อัปเดตข้อมูลสำเร็จ"
@@ -111,7 +112,7 @@ def save_log():
             log_date=log_date,
             mood=data.get('mood'),
             symptoms=symptoms_text,
-            flow=current_flow, # ⭐️ (3) ใช้ค่า flow ที่ดึงมา
+            flow=current_flow, 
             color=data.get('color'),
             notes=data.get('notes')
         )
@@ -120,12 +121,10 @@ def save_log():
 
     db.session.commit()
 
-    # --- ⭐️ (4) เรียกใช้ฟังก์ชันใหม่ ⭐️ ---
     # หลังจากบันทึก DailyLog สำเร็จ
     # ถ้ามีการบันทึก "flow" (แปลว่ามีประจำเดือน) ให้ไปตรวจสอบว่าต้องอัปเดต cycle history หรือไม่
     if current_flow and current_flow != "None":
         update_cycle_history(log_date)
-    # --- ⭐️ สิ้นสุดการเรียกใช้ ⭐️ ---
 
     calendar_events = get_events_data() 
     return jsonify({
@@ -134,18 +133,17 @@ def save_log():
         "new_events": calendar_events
     })
 
-# --- (ฟังก์ชันที่เหลือเหมือนเดิม) ---
 # --- ฟังก์ชันดึง Event (V5.4 - อัปเกรดให้แสดงผลคาดการณ์) ---
 def get_events_data():
     events = []
     
-    # --- 1. (เหมือนเดิม) ดึงข้อมูลบันทึกจริงจาก DailyLog ---
+    # --- 1. ดึงข้อมูลบันทึกจริงจาก DailyLog ---
     logs = DailyLog.query.all()
     for log in logs:
         title = ""
         color = "#CCCCCC"
         textColor = "#333"
-        display_mode = "block" # ⭐️ (ใช้ "block" สำหรับ event ปกติ)
+        display_mode = "block" 
 
         if log.flow and log.flow != "None":
             title = f"🩸 {log.flow}"
@@ -176,32 +174,32 @@ def get_events_data():
             "start": log.log_date, 
             "color": color, 
             "textColor": textColor,
-            "display": display_mode # ⭐️
+            "display": display_mode 
         })
 
-    # --- 2. (⭐️ ใหม่!) ดึงข้อมูลคาดการณ์จาก CycleHistory ---
+    # --- 2. ดึงข้อมูลคาดการณ์จาก CycleHistory ---
     cycles = CycleHistory.query.all()
     for cycle in cycles:
         
-        # 🥚 (ดีไซน์ 1) สร้าง Event วันตกไข่
+        # 🥚 สร้าง Event วันตกไข่
         if cycle.ovulation_date:
             events.append({
                 "title": "🥚 วันตกไข่ (คาดการณ์)",
                 "start": cycle.ovulation_date,
-                "color": "#FFF9E6",      # ⭐️ สีพื้น: เหลืองนวล (สีไข่)
-                "textColor": "#8C5A00",  # ⭐️ สีตัวอักษร: น้ำตาลทอง
-                "borderColor": "#FFD633",# ⭐️ สีขอบ: ทอง
-                "display": "block"       # ⭐️ (ใช้ "block" ให้มันเป็นกล่องสวยๆ)
+                "color": "#FFF9E6",      
+                "textColor": "#8C5A00",  
+                "borderColor": "#FFD633",
+                "display": "block"      
             })
             
-        # 🩸 (ดีไซน์ 2) สร้าง Event วันรอบเดือนถัดไป
+        # 🩸 สร้าง Event วันรอบเดือนถัดไป
         if cycle.next_date:
             events.append({
                 "title": "🩸 รอบถัดไป (คาดการณ์)",
                 "start": cycle.next_date,
-                "color": "#FFF5F7",      # ⭐️ สีพื้น: ชมพูอ่อนมาก
-                "textColor": "#D9002E",  # ⭐️ สีตัวอักษร: แดงเข้ม
-                "borderColor": "#FFB6C1",# ⭐️ สีขอบ: ชมพูอ่อน
+                "color": "#FFF5F7",      
+                "textColor": "#D9002E",  
+                "borderColor": "#FFB6C1",
                 "display": "block"
             })
             
@@ -275,14 +273,29 @@ def analyze_day():
         "self_care_tip": self_care_tip, "doctor_advice": advice_list
     })
 
-# --- Route แสดงหน้าเว็บ (เหมือนเดิม) ---
+# --- Route แสดงหน้าเว็บ (มีการแก้ไข) ---
 @app.route('/')
+def home():
+    """แสดงหน้าแรก (home.html)"""
+    return render_template('home.html')
+
+@app.route('/dashboard')
 def dashboard():
+    """แสดงหน้าปฏิทิน (dashboard.html)"""
     return render_template('dashboard.html')
 
 @app.route('/show_result')
 def show_result_page():
+    """แสดงหน้าผลการวิเคราะห์"""
     return render_template('result_page.html')
 
+# --- Login page route (หากต้องการใช้) ---
+@app.route('/login')
+def login_page():
+    """แสดงหน้า Login/Signup (login.html)"""
+    # โค้ดส่วนนี้จะยังไม่ได้ถูกใช้ในหน้าหลัก แต่มีไว้สำหรับลิงก์จากหน้า login.html
+    return render_template('login.html')
+
 if __name__ == '__main__':
+    # เมื่อรันบนเครื่องตัวเอง (Local)
     app.run(debug=True, port=5000)

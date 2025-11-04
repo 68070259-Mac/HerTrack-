@@ -4,13 +4,15 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Period Tracker - Home</title>
-  <link rel="stylesheet" href="style.css" />
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="style" href="/static/style.css" />
+  
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
 </head>
 <body>
 
   <nav class="top-nav">
-    <img src="logo.PNG" width="90" alt="Her track logo" style="margin: 5px 20px 5px 20px;" >
+    <img src="{{ url_for('static', filename='logo.PNG') }}" width="90" alt="Her track logo" style="margin: 5px 20px 5px 20px;" >
   </nav>
 
     <div class="circle">
@@ -24,15 +26,15 @@
     <div class="button-card">
       <p class="self-assessment">Daily Health Log</p>
       <p class="self-assessment2">บันทึกอาการทุกวัน! เพื่อดูรูปแบบเฉพาะตัว</p><p class="self-assessment2">และมีข้อมูลพร้อมปรึกษาแพทย์</p>
-      <a href="dashboard.html" class="from-btn">Check your symptoms</a> 
+      
+      <a href="/dashboard" class="from-btn">Check your symptoms</a> 
     </div>
 </div>
 
-    <!-- <p class="chance">Chances of pregnancy: <strong>4%</strong></p> -->
-  </div>
+    </div>
 
   <nav class="bottom-nav">
-    <a href="home.html" class="active">Home</a>
+    <a href="/" class="active">Home</a>
     <a href="#">Tracker</a>
     <a href="#">Profile</a>
   </nav>

@@ -7,7 +7,10 @@
   
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
   <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"> <style>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"> 
+  
+  <style>
+    /* ... (CSS ทั้งหมดยังคงเหมือนเดิม) ... */
     @keyframes slideUpFadeIn {
       from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
@@ -16,6 +19,7 @@
       font-family: 'Nunito Sans', sans-serif;
       background: linear-gradient(180deg, #FAFDFF 0%, #FFF6F8 100%);
       color: #333; margin: 0; padding: 16px;
+      padding-bottom: 80px; 
       -webkit-font-smoothing: antialiased;
       text-rendering: optimizeLegibility;
     }
@@ -29,67 +33,46 @@
       box-shadow: 0 8px 24px rgba(251, 106, 144, 0.08);
       padding: 20px;
     }
-    
-    /* --- ⭐️ (ใหม่!) ตกแต่ง Header ของปฏิทิน ⭐️ --- */
-    
-    /* 1. สไตล์ชื่อเดือน (ฟอนต์สวยๆ) */
     .fc-toolbar-title {
       font-family: 'Nunito Sans', sans-serif;
-      font-weight: 800 !important; /* ⭐️ ใช้ 800 (Extra Bold) */
-      font-size: 2rem !important;   /* ⭐️ เพิ่มขนาด */
-      color: #FB6A90; /* ⭐️ สีชมพูหลัก */
+      font-weight: 800 !important;
+      font-size: 2rem !important;
+      color: #FB6A90;
       text-shadow: 0 2px 4px rgba(251, 106, 144, 0.1);
     }
-
-    /* 2. สไตล์ปุ่ม (ฐาน) - ล้างค่าเดิมของ FullCalendar */
     .fc-button {
       background: none !important;
-      border: 2px solid #fde0e6 !important; /* ⭐️ ขอบสีชมพูอ่อน */
-      color: #FB6A90 !important; /* ⭐️ สีไอคอน/ข้อความ */
-      border-radius: 12px !important; /* ⭐️ ขอบมน */
+      border: 2px solid #fde0e6 !important;
+      color: #FB6A90 !important;
+      border-radius: 12px !important;
       box-shadow: none !important;
       transition: all 0.2s ease-out !important;
       font-weight: 700 !important;
       padding: 0.5em 0.8em !important;
-      text-transform: capitalize !important; /* ทำให้ตัวอักษร 'today' สวยขึ้น */
+      text-transform: capitalize !important;
     }
-
-    /* 3. สไตล์ปุ่ม 'Today' (ให้เด่น) */
     .fc-today-button {
       background: #FB6A90 !important;
       color: white !important;
       border-color: #FB6A90 !important;
       box-shadow: 0 2px 5px rgba(251, 106, 144, 0.3) !important;
     }
-
-    /* 4. สไตล์ Hover (ปุ่ม Prev/Next) */
     .fc-button:not(:disabled):not(.fc-today-button):hover {
-      background: #fff0f4 !important; /* ⭐️ พื้นหลังชมพูอ่อนมาก */
+      background: #fff0f4 !important;
       color: #FB6A90 !important;
       transform: translateY(-2px);
     }
-    
-    /* 5. สไตล์ Hover (ปุ่ม Today) */
     .fc-today-button:not(:disabled):hover {
       transform: translateY(-2px);
       box-shadow: 0 4px 10px rgba(251, 106, 144, 0.4) !important;
     }
-
-    /* 6. สไตล์ปุ่มตอน Disable */
     .fc-button:disabled {
       opacity: 0.4 !important;
     }
-    
-    /* 7. จัดระยะห่างระหว่างกลุ่มปุ่ม */
     .fc-header-toolbar {
-        align-items: center; /* ⭐️ จัดให้อยู่กลางแนวตั้ง */
+        align-items: center;
         padding: 10px 0;
     }
-
-    /* --- ⭐️ สิ้นสุดการตกแต่ง Header --- */
-
-
-    /* (CSS ส่วนที่เหลือเหมือนเดิม) */
     .fc-daygrid-day:not(.fc-day-other) {
       cursor: pointer;
       transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
@@ -170,6 +153,28 @@
       opacity: 0.9; transform: translateY(-2px);
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      background-color: #fb6a918a;
+      padding: 20px 0;
+      box-sizing: border-box;
+      box-shadow: 0 -2px 10px rgba(0,0,0,0.05); 
+    }
+    .bottom-nav a {
+      text-decoration: none;
+      font-size: 0.9rem;
+      color: #333333;
+      font-weight: 600;
+      font-family: 'Kanit', 'Nunito Sans', sans-serif;
+    }
+    .bottom-nav a.active {
+      color: #286ba9;
+    }
   </style>
 </head>
 <body>
@@ -182,7 +187,6 @@
 
   <div id="log-section">
     <h2 class="selected-date" id="selected-date-title">กรุณาเลือกวันที่จากปฏิทิน</h2>
-
     <div class="card">
       <div class="section-title">อารมณ์วันนี้เป็นอย่างไร?</div>
       <div class="mood-container">
@@ -193,7 +197,6 @@
         <div class="mood" data-value="⚡ กระปรี้กระเปร่า">⚡ กระปรี้กระเปร่า</div>
       </div>
     </div>
-
     <div class="card">
       <div class="section-title">มีอาการอะไรบ้าง</div>
       <div class="symptom-container">
@@ -204,7 +207,6 @@
         <div class="symptom" data-value="🧡 เจ็บหน้าอก">🧡 เจ็บหน้าอก</div>
       </div>
     </div>
-
     <div class="card">
       <div class="section-title">ปริมาณประจำเดือนวันนี้</div>
       <div class="flow-container">
@@ -213,7 +215,6 @@
         <div class="flow" data-value="มาก">มาก</div>
       </div>
     </div>
-
     <div class="card">
       <div class="section-title">สีของประจำเดือน</div>
       <div class="color-container">
@@ -225,7 +226,6 @@
         <div class="color-option" data-value="ดำคล้ำ">⚫ ดำคล้ำ</div>
       </div>
     </div>
-    
     <div class="card">
       <div class="section-title">บันทึกเพิ่มเติม (ถ้ามี)</div>
       <textarea id="notes" placeholder="..."></textarea>
@@ -341,6 +341,7 @@
             calendar.removeAllEventSources(); 
             calendar.addEventSource(data.new_events);
             calendar.refetchEvents();
+            // ⭐️ ลิงก์นี้ถูกต้อง (ไปหน้า result_page ที่ /show_result)
             window.location.href = `/show_result?date=${selectedDateStr}`;
           } else alert('บันทึกไม่สำเร็จ: ' + data.message);
         })
@@ -348,5 +349,11 @@
       });
     });
   </script>
+
+  <nav class="bottom-nav">
+    <a href="/">Home</a>
+    <a href="/dashboard" class="active">ปฏิทิน</a>
+  </nav>
+
 </body>
 </html>
