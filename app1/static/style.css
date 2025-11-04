@@ -1,0 +1,192 @@
+@import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Nunito Sans', sans-serif;
+  background-color: #d5e5f3;
+  color: #333333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  height: 100vh;
+
+  background-image: url('bg.jpg'); /* ⭐️ แก้เป็น .jpg */
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.top-nav {
+  top: 0;
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  background-color: #b0d3f2;
+  border-bottom: 1px solid #b0d3f2;
+  padding: 5px;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+  z-index: 100;
+  gap: 20px;
+}
+
+
+.circle {
+  width: 240px;
+  height: 240px;
+  background: linear-gradient(180deg, #fb6a91cd, #b0d3f2c8);
+  border-radius: 50%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  margin: auto;
+  margin-top: 10%;
+}
+
+.Period_in {
+  font-size: 1.2rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.days {
+  font-size: 2rem;
+  font-weight: 600;
+  margin: 3px;
+  margin-bottom: 10px;
+}
+
+.date {
+  font-size: 0.8rem;
+  margin-top: 20px;
+  opacity: 0.9;
+}
+
+/* สำหรับปุ่มที่อยู่ด้านบน */
+.start-btn {
+  background-color: #fb6a90;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 60px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+  
+  /* *️⃣ การแก้ไข: เพิ่ม Margin ด้านล่างเพื่อผลักปุ่มถัดไปลงไป */
+  margin: auto;
+  margin-bottom: 15px; /* กำหนดระยะห่าง 15px ระหว่างปุ่มนี้กับปุ่มถัดไป */
+  margin-top: 50px; /* ลบ margin ที่ไม่จำเป็นออก */
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.button-card {
+  /* กำหนดขนาดและการจัดวาง */
+  /* หรือกำหนดความกว้างตามที่ต้องการ */
+  max-width: 450px;
+
+  margin: 20px auto; /* จัดให้อยู่ตรงกลางและมีระยะห่าง */
+
+  padding: 20px 80px ; /* เพิ่ม padding เพื่อให้มีพื้นที่ว่างรอบปุ่มด้านใน */
+
+  
+  /* สไตล์กล่อง (พื้นหลัง, มุมโค้งมน, เงา) */
+  background-color: #ffe9efb8; /* สีพื้นหลังขาว */
+  border-radius: 12px; /* มุมโค้งมน */
+  
+  /* เงา (คล้ายในภาพ) */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); 
+  
+  /* จัดปุ่มให้อยู่ตรงกลางในกล่อง */
+  justify-content: center;
+  align-items: center;
+
+}
+
+.self-assessment {
+    text-align: center; 
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #333333;
+}
+
+
+.self-assessment2 {
+    font-family: 'Kanit', sans-serif;
+    font-style: inherit;
+    text-align: center; 
+    margin-bottom: 10px; /* ระยะห่างระหว่างข้อความกับปุ่ม */
+    font-size: 0.9rem;
+    font-weight: 100;
+    margin: 0;
+    color: #333333;
+}
+
+.from-btn {
+  background-color: #fb6a90;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 30px; /* เพิ่มพื้นที่ด้านข้างให้พอดีขึ้น */
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+
+  /* จัดให้ข้อความอยู่กลางแนวตั้งและแนวนอน */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+
+  margin-top: 20px;
+}
+
+.linkanalysis {
+  background-color: #fb6a90;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  padding: 12px 30px; /* เพิ่มพื้นที่ด้านข้างให้พอดีขึ้น */
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: 0.2s;
+
+  /* จัดให้ข้อความอยู่กลางแนวตั้งและแนวนอน */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+
+  margin: 40px auto 22px;
+}
+
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  justify-content: space-around;
+  background-color: #fb6a918a;
+  padding: 20px 0;
+}
+
+.bottom-nav a {
+  text-decoration: none;
+  font-size: 0.9rem;
+  color: #333333;
+  font-weight: 600;
+}
+
+.bottom-nav a.active {
+  color: #286ba9;
+}

@@ -1,0 +1,10 @@
+# ฐานข้อมูล SQLite
+app.db
+*.db
+
+# โฟลเดอร์ที่ Python สร้างขึ้น
+__pycache__/
+
+# โฟลเดอร์ Virtual Environment (ถ้าคุณใช้)
+venv/
+.venv/
