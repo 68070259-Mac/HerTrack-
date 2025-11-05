@@ -3,16 +3,24 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Period Tracker - Home</title>
+    <title>Her Track - Dashboard</title>
     
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <!-- ⭐️ [เพิ่ม] ⭐️ Library ของ FullCalendar -->
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet"> 
         
     <style>
-        /* (CSS ส่วนใหญ่เหมือนเดิม) */
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
+        
+        /* ⭐️ [เพิ่ม] ⭐️ Keyframes (จาก dashboard) */
+        @keyframes slideUpFadeIn {
+          from { opacity: 0; transform: translateY(15px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
 
         body {
-            padding-top: 80px; /* ⭐️ [แก้ไข] ⭐️ เพิ่ม padding ด้านบนเล็กน้อย */
+            padding-top: 80px; 
             padding-bottom: 70px;
             margin: 0;
             font-family: 'Kanit', sans-serif;
@@ -30,7 +38,7 @@
             width: 100%;
             display: flex;
             justify-content: flex-start;
-            align-items: center; /* ⭐️ [เพิ่ม] ⭐️ */
+            align-items: center; 
             background-color: #b0d3f2;
             border-bottom: 1px solid #b0d3f2;
             padding: 5px;
@@ -38,9 +46,8 @@
             z-index: 1000;
             gap: 20px;
         }
-        /* ⭐️ [เพิ่ม CSS ส่วนนี้] ⭐️ */
         .user-info {
-            margin-left: auto; /* ดันไปทางขวาสุด */
+            margin-left: auto; 
             padding-right: 20px;
             display: flex;
             align-items: center;
@@ -63,8 +70,8 @@
         .logout-btn:hover {
             background: #d6336c;
         }
-        /* ⭐️ [สิ้นสุด CSS ส่วนที่เพิ่ม] ⭐️ */
 
+        /* (CSS ของ วงกลม และฟอร์มตั้งค่า เหมือนเดิม) */
         .circle {
             display: flex;
             flex-direction: column;
@@ -74,7 +81,7 @@
             height: 250px;
             background: linear-gradient(180deg, #fb6a91cd, #b0d3f2c8); 
             border-radius: 50%;
-            margin: 40px auto 30px;
+            margin: 20px auto 30px; /* ⭐️ [แก้ไข] ⭐️ ลด margin-top */
             padding: 20px;
             color: white;
             text-align: center; 
@@ -82,27 +89,16 @@
         .circle.is-period {
             background: linear-gradient(180deg, #d6336c, #fb6a91);
         }
-
-        .Period_in {
-            font-size: 1.2em;
-            margin-bottom: 5px;
-            font-weight: 300;
-        }
-        .days {
-            font-size: 3.5em;
-            font-weight: bold;
-            margin: 0;
-        }
-        .date {
-            font-size: 1em;
-            margin-top: 5px;
-        }
+        .Period_in { font-size: 1.2em; margin-bottom: 5px; font-weight: 300; }
+        .days { font-size: 3.5em; font-weight: bold; margin: 0; }
+        .date { font-size: 1em; margin-top: 5px; }
+        
         .button-group {
             display: flex;
             flex-direction: column;
             gap: 15px;
             padding: 0 20px;
-            max-width: 400px;
+            max-width: 900px; /* ⭐️ [แก้ไข] ⭐️ ขยายความกว้างสูงสุด */
             margin: 0 auto;
         }
         .button-card {
@@ -122,21 +118,12 @@
             color: #777;
             margin: 0;
         }
-        .from-btn {
-            display: block;
-            text-align: center;
-            padding: 10px;
-            margin-top: 15px;
-            background-color: #ffb6c1;
-            color: #d6336c;
-            text-decoration: none;
-            border-radius: 8px;
-            font-weight: bold;
-        }
         #setup-card {
             display: none; 
             border: 2px dashed #d6336c;
             background-color: #fff0f5;
+            max-width: 400px; /* ⭐️ [เพิ่ม] ⭐️ จำกัดความกว้างฟอร์มตั้งค่า */
+            margin: 0 auto 15px auto; /* ⭐️ [เพิ่ม] ⭐️ จัดกลาง */
         }
         #setup-card label {
             display: block;
@@ -170,6 +157,174 @@
             text-align: center;
             display: none;
         }
+
+        /* ⭐️ [เพิ่ม CSS ทั้งหมดนี้] ⭐️ (จาก dashboard.html) */
+        h1 {
+          color: #FB6A90; text-align: center;
+          text-shadow: 0 2px 4px rgba(251, 106, 144, 0.1);
+          margin-top: 0; 
+        }
+        
+        /* ⭐️ [เพิ่ม] ⭐️ CSS สำหรับการ์ดวิเคราะห์ */
+        #analysis-card {
+            display: none; /* ซ่อนไว้ก่อน */
+            background-color: #fffafb;
+            border: 1px solid #fde0e6;
+            line-height: 1.8;
+            font-size: 0.95em;
+            max-width: 450px; /* จำกัดความกว้าง */
+            margin: -10px auto 15px auto; /* จัดกลาง */
+        }
+        #analysis-card h4 {
+            color: #d6336c;
+            margin-top: 0;
+            border-bottom: 1px solid #ffccd9;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        #analysis-card strong.highlight-ovulation {
+            color: #2e8b57;
+            background-color: #e0ffe0;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+        #analysis-card strong.highlight-period {
+            color: #d6336c;
+            background-color: #ffccd9;
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+
+        /* (CSS ของ Calendar) */
+        #calendar-container {
+          /* (ลบ max-width 900px เพราะ .button-group คุมแล้ว) */
+          margin: 0 auto 20px auto;
+          background: #fff; border-radius: 20px;
+          box-shadow: 0 8px 24px rgba(251, 106, 144, 0.08);
+          padding: 20px;
+        }
+        .fc-toolbar-title {
+          font-family: 'Nunito Sans', sans-serif;
+          font-weight: 800 !important;
+          font-size: 2rem !important;
+          color: #FB6A90;
+          text-shadow: 0 2px 4px rgba(251, 106, 144, 0.1);
+        }
+        .fc-button {
+          background: none !important;
+          border: 2px solid #fde0e6 !important;
+          color: #FB6A90 !important;
+          border-radius: 12px !important;
+          box-shadow: none !important;
+          transition: all 0.2s ease-out !important;
+          font-weight: 700 !important;
+          padding: 0.5em 0.8em !important;
+          text-transform: capitalize !important;
+        }
+        .fc-today-button {
+          background: #FB6A90 !important;
+          color: white !important;
+          border-color: #FB6A90 !important;
+          box-shadow: 0 2px 5px rgba(251, 106, 144, 0.3) !important;
+        }
+        .fc-button:not(:disabled):not(.fc-today-button):hover {
+          background: #fff0f4 !important;
+          color: #FB6A90 !important;
+          transform: translateY(-2px);
+        }
+        .fc-today-button:not(:disabled):hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 10px rgba(251, 106, 144, 0.4) !important;
+        }
+        .fc-button:disabled {
+          opacity: 0.4 !important;
+        }
+        .fc-header-toolbar {
+            align-items: center;
+            padding: 10px 0;
+        }
+        .fc-daygrid-day:not(.fc-day-other) {
+          cursor: pointer;
+          transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+        }
+        .fc-daygrid-day:not(.fc-day-other):hover {
+          transform: translateY(-4px);
+          box-shadow: 0 6px 16px rgba(251, 106, 144, 0.15);
+          z-index: 10; background: #fff;
+        }
+        .fc-event {
+          border: none !important; border-radius: 8px !important;
+          padding: 4px 8px !important; font-weight: 600 !important;
+          font-size: 0.85rem !important;
+          box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        #log-section {
+          /* (ลบ max-width 900px เพราะ .button-group คุมแล้ว) */
+          margin: 0 auto;
+          background: white; border-radius: 20px;
+          box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+          padding: 24px; display: none;
+          animation: slideUpFadeIn 0.5s ease-out forwards;
+        }
+        h2.selected-date {
+          font-size: 1.5rem; font-weight: 800; color: #FB6A90;
+          text-align: center; margin-bottom: 20px;
+          border-bottom: 2px dashed #fde0e6; padding-bottom: 15px;
+        }
+        .section-title {
+          font-weight: 700; color: #286BA9; font-size: 1.1rem;
+          margin-bottom: 10px; border-left: 4px solid #B0D3F2; padding-left: 8px;
+        }
+        .mood-container, .symptom-container, .flow-container, .color-container {
+          display: flex; flex-wrap: wrap; gap: 10px;
+        }
+        .mood, .symptom, .flow, .color-option {
+          flex: 1 1 calc(33.33% - 10px); text-align: center;
+          border: 2px solid #B0D3F2; border-radius: 14px;
+          padding: 12px; background: #FAFDFF; cursor: pointer;
+          font-weight: 600; transition: all 0.25s ease;
+        }
+        .mood:hover, .symptom:hover, .flow:hover, .color-option:hover {
+          transform: scale(1.03);
+        }
+        .active {
+          background-color: #FB6A90 !important; color: white !important;
+          border-color: #FB6A90 !important;
+          box-shadow: 0 4px 10px rgba(251, 106, 144, 0.3);
+          transform: scale(1.02);
+        }
+        textarea {
+          width: 100%; border-radius: 12px; border: 1.5px solid #B0D3F2;
+          padding: 12px; font-family: inherit; font-size: 1rem;
+          resize: vertical; margin-top: 10px; box-sizing: border-box;
+          transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        textarea:focus {
+          outline: none; border-color: #FB6A90;
+          box-shadow: 0 0 0 3px rgba(251, 106, 144, 0.2);
+        }
+        button {
+          width: 100%; padding: 14px;
+          color: white; font-weight: 700; border: none; border-radius: 12px;
+          cursor: pointer; font-size: 1.1rem; margin-top: 10px;
+          transition: all 0.2s ease-out;
+        }
+        #saveButton {
+          background: linear-gradient(90deg, #FB6A90, #FE0C21);
+        }
+        .back-button {
+          display: block; width: 100%; padding: 14px;
+          background: linear-gradient(90deg, #B0D3F2, #79b7eb);
+          color: white; font-weight: 700; border: none; border-radius: 12px;
+          cursor: pointer; font-size: 1.1rem; text-align: center;
+          text-decoration: none; margin-top: 10px; box-sizing: border-box;
+          transition: all 0.2s ease-out;
+        }
+        #saveButton:hover, .back-button:hover {
+          opacity: 0.9; transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        /* ⭐️ [สิ้นสุด CSS ส่วนที่เพิ่ม] ⭐️ */
     </style>
 </head>
 <body>
@@ -177,14 +332,15 @@
     <nav class="top-nav">
         <img src="{{ url_for('static', filename='logo.jpg') }}" width="90" alt="Her track logo" style="margin: 5px 20px 5px 20px;" >
         
-        <!-- ⭐️ [เพิ่ม HTML ส่วนนี้] ⭐️ -->
         <div class="user-info">
             <span>สวัสดี, <strong>{{ current_user.username }}</strong>!</span>
             <a href="{{ url_for('logout') }}" class="logout-btn">ออกจากระบบ</a>
         </div>
-        <!-- ⭐️ สิ้นสุดส่วนที่เพิ่ม ⭐️ -->
     </nav>
-        
+    
+    <!-- ⭐️ [ย้าย] ⭐️ ย้าย H1 ขึ้นมาบนสุด -->
+    <h1 style="padding-top: 20px;">🩷 Dashboard สุขภาพรอบเดือน</h1>
+
     <div class="circle">
         <p class="Period_in">ประจำเดือนในอีก</p>
         <h3 class="days">... วัน</h3>
@@ -210,18 +366,71 @@
             <p id="setup-message"></p>
         </div>
 
-
-        <!-- ปุ่มหลัก (เหมือนเดิม) -->
-        <div class="button-card">
-            <p class="self-assessment" style="color: #6c7d9c;">📅 ดูปฏิทินและบันทึกอาการ</p>
-            <p class="self-assessment2">ปฏิทินรอบเดือน (ของจริง) และบันทึกอาการรายวัน</p>
-            
-            <a href="/dashboard" class="from-btn">ดูปฏิทิน / บันทึกอาการ</a> 
+        <!-- ⭐️ [เพิ่ม] ⭐️ การ์ดสรุปข้อมูลวิเคราะห์ -->
+        <div id="analysis-card" class="button-card">
+            <h4>สรุปข้อมูลรอบเดือนของคุณ</h4>
+            <span id="analysis-content">... กำลังโหลด ...</span>
         </div>
+
+
+        <!-- ⭐️ [เพิ่ม HTML ทั้งหมดนี้] ⭐️ (จาก dashboard.html) -->
+        <div id="calendar-container">
+            <div id="calendar"></div>
+        </div>
+
+        <div id="log-section">
+            <h2 class="selected-date" id="selected-date-title">กรุณาเลือกวันที่จากปฏิทิน</h2>
+            <div class="card">
+            <div class="section-title">อารมณ์วันนี้เป็นอย่างไร?</div>
+            <div class="mood-container">
+                <div class="mood" data-value="😊 ร่าเริง">😊 ร่าเริง</div>
+                <div class="mood" data-value="😴 อ่อนเพลีย">😴 อ่อนเพลีย</div>
+                <div class="mood" data-value="😢 เศร้า">😢 เศร้า</div>
+                <div class="mood" data-value="😣 เครียด">😣 เครียด</div>
+                <div class="mood" data-value="⚡ กระปรี้กระเปร่า">⚡ กระปรี้กระเปร่า</div>
+            </div>
+            </div>
+            <div class="card">
+            <div class="section-title">มีอาการอะไรบ้าง</div>
+            <div class="symptom-container">
+                <div class="symptom" data-value="⚡ ปวดท้อง">⚡ ปวดท้อง</div>
+                <div class="symptom" data-value="☕ ปวดหัว">☕ ปวดหัว</div>
+                <div class="symptom" data-value="💤 เหนื่อย">💤 เหนื่อย</div>
+                <div class="symptom" data-value="💧 ท้องอืด">💧 ท้องอืด</div>
+                <div class="symptom" data-value="🧡 เจ็บหน้าอก">🧡 เจ็บหน้าอก</div>
+            </div>
+            </div>
+            <div class="card">
+            <div class="section-title">ปริมาณประจำเดือนวันนี้</div>
+            <div class="flow-container">
+                <div class="flow" data-value="น้อย">น้อย</div>
+                <div class="flow" data-value="ปานกลาง">ปานกลาง</div>
+                <div class="flow" data-value="มาก">มาก</div>
+            </div>
+            </div>
+            <div class="card">
+            <div class="section-title">สีของประจำเดือน</div>
+            <div class="color-container">
+                <div class="color-option" data-value="แดงสด">🔴 แดงสด</div>
+                <div class="color-option" data-value="ชมพู">🌸 ชมพู</div>
+                <div class="color-option" data-value="ส้ม">🧡 ส้ม</div>
+                <div class="color-option" data-value="แดงเข้มหรือน้ำตาล">🤎 แดงเข้มหรือน้ำตาล</div>
+                <div class="color-option" data-value="เขียวปนเทา">💚 เขียวปนเทา</div>
+                <div class="color-option" data-value="ดำคล้ำ">⚫ ดำคล้ำ</div>
+            </div>
+            </div>
+            <div class="card">
+            <div class="section-title">บันทึกเพิ่มเติม (ถ้ามี)</div>
+            <textarea id="notes" placeholder="..."></textarea>
+            </div>
+
+            <button id="saveButton">💾 บันทึกข้อมูล</button>
+            <!-- ⭐️ [ลบปุ่ม] ⭐️ (ลบปุ่ม "กลับหน้าหลัก" เพราะเราอยู่ในหน้าหลักแล้ว) -->
+        </div>
+        <!-- ⭐️ [สิ้นสุด HTML ส่วนที่เพิ่ม] ⭐️ -->
 
     </div>
 
-    <!-- (JavaScript ทั้งหมดเหมือนเดิม) -->
     <script>
         const thaiMonths = [
             "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
@@ -229,31 +438,44 @@
         ];
 
         function formatThaiDate(date) {
+            // ⭐️ [แก้ไข] ⭐️ เพิ่มการตรวจสอบ object
+            if (!date) return 'N/A';
             const d = date.getDate();
             const m = thaiMonths[date.getMonth()];
             const y = date.getFullYear() + 543; 
             return `${d} ${m} ${y}`;
         }
-
+        
+        // ⭐️ [แก้ไข] ⭐️ ฟังก์ชันนี้จะทำหลายอย่างมากขึ้น
         function loadHomeSummary() {
             const daysEl = document.querySelector(".days");
             const dateEl = document.querySelector(".date");
             const periodInEl = document.querySelector(".Period_in");
             const circleDiv = document.querySelector(".circle");
             const setupCard = document.getElementById('setup-card');
+            
+            // ⭐️ [เพิ่ม] ⭐️ ดึง Element ใหม่
+            const calendarContainer = document.getElementById('calendar-container');
+            const analysisCard = document.getElementById('analysis-card');
+            const analysisContent = document.getElementById('analysis-content');
 
-            fetch('/api/get_next_period')
+            // 1. ยิง API ไปยัง Backend
+            fetch('/api/get_home_summary') // ⭐️ [แก้ไข] ⭐️ เรียก API ใหม่
                 .then(res => res.json())
                 .then(data => {
-                    if (data.status === 'success' && data.next_date) {
+                    if (data.status === 'success') {
                         
+                        // 2. แปลงข้อมูลวันที่
                         const nextPeriodDate = new Date(data.next_date);
+                        const lastStartDate = new Date(data.last_start_date);
+                        const ovulationDate = new Date(data.ovulation_date);
                         const today = new Date();
                         today.setHours(0, 0, 0, 0);
 
                         const oneDay = 1000 * 60 * 60 * 24;
                         const daysUntil = Math.ceil((nextPeriodDate - today) / oneDay);
 
+                        // 3. แสดงผล [วงกลม]
                         if (daysUntil <= 0) {
                             periodInEl.textContent = `ถึงกำหนดรอบเดือน`;
                             daysEl.textContent = `วันนี้`;
@@ -266,13 +488,29 @@
                             circleDiv.classList.remove('is-period');
                         }
                         
+                        // 4. แสดงผล [การ์ดวิเคราะห์] ⭐️ [เพิ่ม] ⭐️
+                        analysisContent.innerHTML = `
+                            🔹 **วันที่เริ่มรอบล่าสุด**: ${formatThaiDate(lastStartDate)}<br>
+                            🔹 **ความยาวรอบเดือนเฉลี่ย**: ${data.avg_cycle_length} วัน<br>
+                            🩷 **วันตกไข่ประมาณ**: <strong class="highlight-ovulation">${formatThaiDate(ovulationDate)}</strong><br>
+                            🌿 **รอบเดือนถัดไปคาดว่า**: <strong class="highlight-period">${formatThaiDate(nextPeriodDate)}</strong>
+                        `;
+                        
+                        // 5. แสดง/ซ่อน UI ⭐️ [แก้ไข] ⭐️
                         setupCard.style.display = 'none';
+                        analysisCard.style.display = 'block'; // ⭐️ แสดงการ์ดวิเคราะห์
+                        calendarContainer.style.display = 'block'; // ⭐️ แสดงปฏิทิน
 
                     } else if (data.status === 'no_data') {
+                        // 4. แสดงผล (กรณีไม่มีข้อมูล)
                         periodInEl.textContent = `ไม่พบข้อมูล`;
                         daysEl.textContent = `N/A`;
                         dateEl.textContent = `กรุณาตั้งค่าข้อมูลครั้งแรกด้านล่าง`;
+                        
+                        // 5. แสดง/ซ่อน UI ⭐️ [แก้ไข] ⭐️
                         setupCard.style.display = 'block';
+                        analysisCard.style.display = 'none'; // ⭐️ ซ่อนการ์ดวิเคราะห์
+                        calendarContainer.style.display = 'none'; // ⭐️ ซ่อนปฏิทิน
                     }
                 })
                 .catch(err => {
@@ -283,6 +521,7 @@
                 });
         }
         
+        // --- (ฟังก์ชัน saveInitialData เหมือนเดิม) ---
         function saveInitialData() {
             const lastStart = document.getElementById('initialLastStart').value;
             const prevStart = document.getElementById('initialPrevStart').value;
@@ -322,14 +561,135 @@
             });
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
+
+        // ⭐️ [เพิ่ม JavaScript ทั้งหมดนี้] ⭐️ (จาก dashboard.html)
+        document.addEventListener('DOMContentLoaded', function() {
+            
+            // --- (ส่วนของ Home ที่ต้องรัน) ---
             loadHomeSummary();
             const saveBtn = document.getElementById('saveInitialDataButton');
             if (saveBtn) {
                 saveBtn.addEventListener('click', saveInitialData);
             }
-        });
+            
+            // --- (ส่วนของ Dashboard ที่ต้องรัน) ---
+            const calendarEl = document.getElementById('calendar');
+            const logSection = document.getElementById('log-section');
+            const dateTitle = document.getElementById('selected-date-title');
+            const saveButton = document.getElementById('saveButton');
+            let selectedDateStr = null;
 
+            // (ตรวจสอบว่ามี calendarEl ก่อนรัน)
+            if (calendarEl) {
+                const calendar = new FullCalendar.Calendar(calendarEl, {
+                    initialView: 'dayGridMonth',
+                    locale: 'th',
+                    height: "auto",
+                    events: '/api/get-events', // ⭐️ นี่คือ API ที่ดึงข้อมูลจริงและคาดการณ์
+                    
+                    dateClick: function(info) {
+                        selectedDateStr = info.dateStr;
+                        const d = new Date(info.dateStr);
+                        const formattedDate = d.toLocaleString("th-TH", {
+                            year: 'numeric', month: 'long', day: 'numeric'
+                        });
+                        dateTitle.textContent = `บันทึกข้อมูลวันที่ ${formattedDate}`;
+
+                        fetch(`/api/analyze?date=${selectedDateStr}`)
+                            .then(res => res.json())
+                            .then(data => {
+                                clearSelections(); 
+                                if (data.status === 'success') {
+                                    populateForm(data);
+                                } 
+                                logSection.style.display = 'block';
+                            })
+                            .catch(err => {
+                                console.error("Error fetching data:", err);
+                                clearSelections();
+                                logSection.style.display = 'block';
+                            });
+                    }
+                });
+                calendar.render();
+
+                // (ฟังก์ชัน JS ของ Dashboard)
+                function clearSelections() {
+                    document.querySelectorAll('.mood.active, .symptom.active, .flow.active, .color-option.active')
+                    .forEach(el => el.classList.remove('active'));
+                    document.getElementById('notes').value = '';
+                }
+                
+                function populateForm(data) {
+                    if (data.mood) {
+                    document.querySelector(`.mood[data-value="${data.mood}"]`)?.classList.add('active');
+                    }
+                    if (data.symptoms && data.symptoms.length > 0) {
+                    data.symptoms.forEach(symptomValue => {
+                        if (symptomValue) { 
+                        document.querySelector(`.symptom[data-value="${symptomValue}"]`)?.classList.add('active');
+                        }
+                    });
+                    }
+                    if (data.flow) {
+                    document.querySelector(`.flow[data-value="${data.flow}"]`)?.classList.add('active');
+                    }
+                    if (data.color) {
+                    document.querySelector(`.color-option[data-value="${data.color}"]`)?.classList.add('active');
+                    }
+                    document.getElementById('notes').value = data.notes || '';
+                }
+
+                setupToggle('.symptom', false);
+                setupToggle('.mood', true);
+                setupToggle('.flow', true);
+                setupToggle('.color-option', true);
+
+                function setupToggle(selector, isSingle) {
+                    const elements = document.querySelectorAll(selector);
+                    elements.forEach(el => {
+                    el.addEventListener('click', () => {
+                        if (isSingle) {
+                        elements.forEach(e => e.classList.remove('active'));
+                        el.classList.add('active');
+                        } else {
+                        el.classList.toggle('active');
+                        }
+                    });
+                    });
+                }
+
+                saveButton.addEventListener('click', () => {
+                    if (!selectedDateStr) return alert('เกิดข้อผิดพลาด: ไม่ได้เลือกวันที่');
+                    
+                    const mood = document.querySelector('.mood.active')?.dataset.value || null;
+                    const symptoms = Array.from(document.querySelectorAll('.symptom.active')).map(el => el.dataset.value);
+                    const flow = document.querySelector('.flow.active')?.dataset.value || null;
+                    const color = document.querySelector('.color-option.active')?.dataset.value || null;
+                    const notes = document.getElementById('notes').value;
+                    
+                    const dailyData = { date: selectedDateStr, mood, symptoms, flow, color, notes };
+
+                    fetch('/api/save-log', {
+                    method: 'POST', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(dailyData),
+                    })
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.status === 'success') {
+                            calendar.removeAllEventSources(); 
+                            calendar.addEventSource(data.new_events);
+                            calendar.refetchEvents();
+                            // ⭐️ [แก้ไข] ⭐️ ลิงก์ไปหน้าผลวิเคราะห์ (Analysis)
+                            window.location.href = `/show_result?date=${selectedDateStr}`;
+                        } else alert('บันทึกไม่สำเร็จ: ' + data.message);
+                    })
+                    .catch(() => alert('ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้'));
+                });
+
+            } // (จบ if(calendarEl))
+
+        }); // (จบ DOMContentLoaded)
     </script>
 </body>
 </html>

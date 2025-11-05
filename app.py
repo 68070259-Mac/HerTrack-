@@ -1,50 +1,36 @@
-# 📄 app.py (V7.0 - User System)
+# 📄 app.py (V7.3 - Ultimate Dashboard API)
 
 import os
 import datetime
 from datetime import timedelta 
 from flask import Flask, request, jsonify, render_template, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
-# ⭐️ [เพิ่ม] ⭐️ Import Library สำหรับ Login และเข้ารหัสผ่าน
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
 
-# ⭐️ [Vercel Fix - เหมือนเดิม] ⭐️
+# (ส่วน Config, Models, และฟังก์ชันคำนวณส่วนใหญ่ เหมือน V7.0)
+# ... (ย่อโค้ดส่วนบน) ...
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__,
             static_folder=os.path.join(basedir, 'static'),
             template_folder=os.path.join(basedir, 'templates'))
-
-# ⭐️ [เพิ่ม] ⭐️ SECRET_KEY จำเป็นสำหรับ Session และการ Login
 app.config['SECRET_KEY'] = 'a_very_secret_key_that_should_be_changed' 
-
-# --- Database Config (เหมือนเดิม) ---
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://neondb_owner:npg_mNkRXfiBvw62@ep-red-feather-a1w1jljl-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
-
-# ⭐️ [เพิ่ม] ⭐️ ตั้งค่า Bcrypt และ LoginManager
 bcrypt = Bcrypt(app)
 login_manager = LoginManager()
 login_manager.init_app(app)
-# ⭐️ [เพิ่ม] ⭐️ ถ้าผู้ใช้พยายามเข้าหน้าที่ต้อง Login, ให้เด้งไปที่ 'login'
 login_manager.login_view = 'login' 
 login_manager.login_message = 'กรุณาเข้าสู่ระบบเพื่อใช้งานหน้านี้'
-login_manager.login_message_category = 'info' # (สำหรับ CSS)
+login_manager.login_message_category = 'info' 
 
-# --- Models (อัปเดตใหม่ทั้งหมด) ---
-
-# ⭐️ [เพิ่ม] ⭐️ Model User
 class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True, nullable=False)
     password_hash = db.Column(db.String(200), nullable=False)
-    
-    # ⭐️ [เพิ่ม] ⭐️ สร้างความสัมพันธ์ (Relationship)
     daily_logs = db.relationship('DailyLog', backref='user', lazy=True)
     cycle_history = db.relationship('CycleHistory', backref='user', lazy=True)
-
-# ⭐️ [แก้ไข] ⭐️ เพิ่ม user_id (Foreign Key)
 class DailyLog(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     log_date = db.Column(db.String(20), nullable=False)
@@ -53,92 +39,52 @@ class DailyLog(db.Model):
     flow = db.Column(db.String(100))
     color = db.Column(db.String(100))
     notes = db.Column(db.Text)
-    # ⭐️ [เพิ่ม] ⭐️ ระบุว่า Log นี้เป็นของผู้ใช้คนไหน
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-# ⭐️ [แก้ไข] ⭐️ เพิ่ม user_id (Foreign Key)
 class CycleHistory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start_date = db.Column(db.String(100), nullable=False) 
     ovulation_date = db.Column(db.String(100), nullable=True) 
     next_date = db.Column(db.String(100), nullable=True) 
-    # ⭐️ [เพิ่ม] ⭐️ ระบุว่าประวัตินี้เป็นของผู้ใช้คนไหน
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
-# ⭐️ [เพิ่ม] ⭐️ ฟังก์ชันนี้จำเป็นสำหรับ Flask-Login
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
-
-# --- ฟังก์ชันคำนวณค่าเฉลี่ย (⭐️ แก้ไข ⭐️) ---
 def get_average_cycle_length():
-    """
-    คำนวณความยาวรอบเดือนเฉลี่ย (V7.0 - เฉพาะผู้ใช้ที่ Login)
-    """
     DEFAULT_CYCLE_LENGTH = 28
-    
     try:
-        # ⭐️ [แก้ไข] ⭐️ เพิ่ม .filter_by(user_id=current_user.id)
         cycles = CycleHistory.query.filter_by(user_id=current_user.id).order_by(CycleHistory.start_date.asc()).all()
-        
         if len(cycles) < 2:
-            # ถ้ามีข้อมูลไม่ถึง 2 รอบ ให้ใช้ค่าเริ่มต้น
             return DEFAULT_CYCLE_LENGTH
-
-        # คำนวณส่วนต่างระหว่างรอบ
         diffs = []
         for i in range(len(cycles) - 1):
             date_a = datetime.datetime.strptime(cycles[i].start_date, '%Y-%m-%d').date()
             date_b = datetime.datetime.strptime(cycles[i+1].start_date, '%Y-%m-%d').date()
             diff = (date_b - date_a).days
-            
-            # ป้องกันข้อมูลผิดพลาด (เช่น ห่างกัน 3 วัน หรือ 90 วัน)
-            # เราจะนับเฉพาะรอบที่สมเหตุสมผล (21-45 วัน)
             if 21 <= diff <= 45:
                 diffs.append(diff)
-
         if not diffs:
-            # ถ้าข้อมูลที่มีอยู่ไม่สมเหตุสมผล (เช่น มี 3 รอบ แต่ห่างกัน 100 วันหมด)
             return DEFAULT_CYCLE_LENGTH
-            
-        # หาค่าเฉลี่ย
         average = sum(diffs) / len(diffs)
-        return int(round(average)) # คืนค่าเป็นจำนวนเต็ม
-
+        return int(round(average))
     except Exception as e:
         print(f"❌ เกิดข้อผิดพลาดในการคำนวณค่าเฉลี่ย: {e}")
         return DEFAULT_CYCLE_LENGTH
-# --- สิ้นสุดฟังก์ชัน ---
-
-
-# --- ฟังก์ชันอัปเดต Cycle History (⭐️ แก้ไข ⭐️) ---
 def update_cycle_history(current_date_str):
-    """
-    อัปเดต CycleHistory (V7.0 - เฉพาะผู้ใช้ที่ Login)
-    """
     AVG_OVULATION_DAY = 14 
     MIN_DAYS_FOR_NEW_CYCLE = 21 
-    
     try:
         current_date = datetime.datetime.strptime(current_date_str, '%Y-%m-%d').date()
-
-        # ⭐️ [แก้ไข] ⭐️ เพิ่ม .filter_by(user_id=current_user.id)
         latest_cycle = CycleHistory.query.filter_by(user_id=current_user.id).order_by(CycleHistory.start_date.desc()).first()
-
         is_new_cycle = False
         if not latest_cycle:
             is_new_cycle = True
         else:
             latest_start_date = datetime.datetime.strptime(latest_cycle.start_date, '%Y-%m-%d').date()
             days_diff = (current_date - latest_start_date).days
-            
             if days_diff >= MIN_DAYS_FOR_NEW_CYCLE:
                 is_new_cycle = True
-
         if is_new_cycle:
             new_start_date = current_date
-            
-            # ⭐️ [แก้ไข] ⭐️ เพิ่ม user_id=current_user.id
             new_cycle_entry = CycleHistory(
                 start_date=new_start_date.strftime('%Y-%m-%d'),
                 user_id=current_user.id 
@@ -146,42 +92,28 @@ def update_cycle_history(current_date_str):
             db.session.add(new_cycle_entry)
             db.session.commit()
             print(f"✅ ตรวจพบรอบเดือนใหม่! (User: {current_user.id}) เริ่มวันที่ {new_start_date}")
-
             new_avg_length = get_average_cycle_length()
             print(f"ℹ️ ค่าเฉลี่ยรอบเดือนใหม่ (User: {current_user.id}) คือ {new_avg_length} วัน")
-
             ovulation_date = new_start_date + timedelta(days=AVG_OVULATION_DAY)
             next_date = new_start_date + timedelta(days=new_avg_length)
-
             new_cycle_entry.ovulation_date = ovulation_date.strftime('%Y-%m-%d')
             new_cycle_entry.next_date = next_date.strftime('%Y-%m-%d')
             db.session.commit()
-        
         else:
             print(f"ℹ️ บันทึกวันที่มีประจำเดือน {current_date_str} (User: {current_user.id}) (ไม่ใช่การเริ่มรอบใหม่)")
-
     except Exception as e:
         print(f"❌ เกิดข้อผิดพลาดในการอัปเดต CycleHistory (User: {current_user.id}): {e}")
         db.session.rollback() 
-# --- สิ้นสุดฟังก์ชันที่แก้ไข ---
-
-
-# --- API บันทึกข้อมูล (⭐️ แก้ไข ⭐️) ---
 @app.route('/api/save-log', methods=['POST'])
-@login_required # ⭐️ [เพิ่ม] ⭐️
+@login_required 
 def save_log():
     data = request.json
     log_date = data.get('date')
     if not log_date:
         return jsonify({"status": "error", "message": "ไม่พบวันที่"}), 400
-
     symptoms_text = ",".join(data.get('symptoms', []))
-    
-    # ⭐️ [แก้ไข] ⭐️ เพิ่ม .filter_by(user_id=current_user.id)
     log = DailyLog.query.filter_by(log_date=log_date, user_id=current_user.id).first()
-    
     current_flow = data.get('flow') 
-
     if log:
         log.mood = data.get('mood')
         log.symptoms = symptoms_text
@@ -190,7 +122,6 @@ def save_log():
         log.notes = data.get('notes')
         message = "อัปเดตข้อมูลสำเร็จ"
     else:
-        # ⭐️ [แก้ไข] ⭐️ เพิ่ม user_id=current_user.id
         log = DailyLog(
             log_date=log_date,
             mood=data.get('mood'),
@@ -202,33 +133,23 @@ def save_log():
         )
         db.session.add(log)
         message = "บันทึกข้อมูลใหม่สำเร็จ"
-
     db.session.commit()
-
     if current_flow and current_flow != "None":
         update_cycle_history(log_date)
-
     calendar_events = get_events_data() 
     return jsonify({
         "status": "success", 
         "message": message,
         "new_events": calendar_events
     })
-
-# --- ฟังก์ชันดึง Event (⭐️ แก้ไข ⭐️) ---
-# (ฟังก์ชันนี้ไม่จำเป็นต้อง @login_required เพราะมันถูกเรียกใช้ภายใน)
 def get_events_data():
     events = []
-    
-    # ⭐️ [แก้ไข] ⭐️ เพิ่ม .filter_by(user_id=current_user.id)
     logs = DailyLog.query.filter_by(user_id=current_user.id).all()
     for log in logs:
-        # (โค้ดแสดงผลเหมือนเดิม)
         title = ""
         color = "#CCCCCC"
         textColor = "#333"
         display_mode = "block" 
-
         if log.flow and log.flow != "None":
             title = f"🩸 {log.flow}"
             if log.flow == "มาก": color = "#E53E3E"
@@ -252,7 +173,6 @@ def get_events_data():
             color = "#B0D3F2"
         else:
             continue
-            
         events.append({
             "title": title, 
             "start": log.log_date, 
@@ -260,11 +180,8 @@ def get_events_data():
             "textColor": textColor,
             "display": display_mode 
         })
-
-    # ⭐️ [แก้ไข] ⭐️ เพิ่ม .filter_by(user_id=current_user.id)
     cycles = CycleHistory.query.filter_by(user_id=current_user.id).all()
     for cycle in cycles:
-        
         if cycle.ovulation_date:
             events.append({
                 "title": "🥚 วันตกไข่ (คาดการณ์)",
@@ -274,7 +191,6 @@ def get_events_data():
                 "borderColor": "#FFD633",
                 "display": "block"      
             })
-            
         if cycle.next_date:
             events.append({
                 "title": "🩸 รอบถัดไป (คาดการณ์)",
@@ -284,29 +200,20 @@ def get_events_data():
                 "borderColor": "#FFB6C1",
                 "display": "block"
             })
-            
     return events
-
 @app.route('/api/get-events')
-@login_required # ⭐️ [เพิ่ม] ⭐️
+@login_required 
 def get_events():
     return jsonify(get_events_data())
-
-# --- API Analyze (⭐️ แก้ไข ⭐️) ---
 @app.route('/api/analyze', methods=['GET'])
-@login_required # ⭐️ [เพิ่ม] ⭐️
+@login_required 
 def analyze_day():
     date = request.args.get('date')
     if not date:
         return jsonify({"status": "error", "message": "กรุณาระบุวันที่"})
-    
-    # ⭐️ [แก้ไข] ⭐️ เพิ่ม .filter_by(user_id=current_user.id)
     log = DailyLog.query.filter_by(log_date=date, user_id=current_user.id).first()
-    
     if not log:
         return jsonify({"status": "error", "message": "ไม่พบข้อมูลของวันนี้"})
-    
-    # (โค้ดคำนวณคะแนนที่เหลือเหมือนเดิมทั้งหมด)
     score = 0
     symptoms_list = log.symptoms.split(',') if log.symptoms else [] 
     mood_str = log.mood or "" 
@@ -355,7 +262,6 @@ def analyze_day():
     if 'ปวดท้องรุนแรง' in notes_lower or 'ปวดจนทนไม่ไหว' in notes_lower: advice_list.append("คุณบันทึกว่า 'ปวดท้องรุนแรง' หากปวดมากจนยาแก้ปวดทั่วไปเอาไม่อยู่ ควรพบแพทย์เพื่อตรวจหาสาเหตุนะคะ")
     valid_symptoms = [s for s in symptoms_list if s] 
     if len(valid_symptoms) >= 4: advice_list.append("คุณมีอาการหลายอย่างพร้อมกัน (4+ รายการ) หากอาการเหล่านี้รบกวนชีวิตประจำวันเป็นประจำ ควรปรึกษาแพทย์เพื่อหาสาเหตุนะคะ")
-    
     return jsonify({
         "status": "success", "date": log.log_date, "mood": mood_str,
         "symptoms": valid_symptoms, "flow": flow_str, "color": color_str,
@@ -363,160 +269,131 @@ def analyze_day():
         "self_care_tip": self_care_tip, "doctor_advice": advice_list
     })
 
-# --- API สำหรับหน้า Home (⭐️ แก้ไข ⭐️) ---
-@app.route('/api/get_next_period')
-@login_required # ⭐️ [เพิ่ม] ⭐️
-def get_next_period():
+# --- ⭐️ [แก้ไข] API สำหรับหน้า Home ⭐️ ---
+@app.route('/api/get_home_summary') # ⭐️ [แก้ไข] ⭐️ เปลี่ยนชื่อ Route
+@login_required 
+def get_home_summary(): # ⭐️ [แก้ไข] ⭐️ เปลี่ยนชื่อฟังก์ชัน
+    """
+    ดึงข้อมูลสรุปทั้งหมดสำหรับหน้า Home (V7.3)
+    """
     try:
-        # ⭐️ [แก้ไข] ⭐️ เพิ่ม .filter_by(user_id=current_user.id)
         latest_cycle = CycleHistory.query.filter_by(user_id=current_user.id).order_by(CycleHistory.start_date.desc()).first()
         
         if latest_cycle and latest_cycle.next_date:
+            # ⭐️ [เพิ่ม] ⭐️ ดึงค่าเฉลี่ยมาด้วย
+            avg_length = get_average_cycle_length()
+            
+            # ⭐️ [แก้ไข] ⭐️ ส่ง JSON ที่มีข้อมูลครบถ้วน
             return jsonify({
                 "status": "success",
+                "last_start_date": latest_cycle.start_date,
+                "avg_cycle_length": avg_length,
+                "ovulation_date": latest_cycle.ovulation_date,
                 "next_date": latest_cycle.next_date 
             })
         else:
-            return jsonify({"status": "no_data", "next_date": None})
+            return jsonify({"status": "no_data"}) # ⭐️ [แก้ไข] ⭐️ ไม่ต้องส่ง next_date: None
+            
     except Exception as e:
-        print(f"❌ เกิดข้อผิดพลาดใน /api/get_next_period: {e}")
+        print(f"❌ เกิดข้อผิดพลาดใน /api/get_home_summary: {e}")
         return jsonify({"status": "error", "message": str(e)})
 
-# --- API สำหรับตั้งค่าเริ่มต้น (⭐️ แก้ไข ⭐️) ---
+# --- API สำหรับตั้งค่าเริ่มต้น (เหมือนเดิม) ---
 @app.route('/api/initial_setup', methods=['POST'])
-@login_required # ⭐️ [เพิ่ม] ⭐️
+@login_required 
 def initial_setup():
     try:
         data = request.json
         last_start_str = data.get('lastStartDate')
         prev_start_str = data.get('prevStartDate')
-
         if not last_start_str or not prev_start_str:
             return jsonify({"status": "error", "message": "กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง"}), 400
-
         last_start = datetime.datetime.strptime(last_start_str, '%Y-%m-%d').date()
         prev_start = datetime.datetime.strptime(prev_start_str, '%Y-%m-%d').date()
-
         if prev_start >= last_start:
             return jsonify({"status": "error", "message": "วันที่ 'รอบก่อนหน้า' ต้องมาก่อน 'รอบล่าสุด'"}), 400
-
-        # ⭐️ [แก้ไข] ⭐️ เพิ่ม .filter_by(user_id=current_user.id)
         CycleHistory.query.filter_by(user_id=current_user.id).delete()
         db.session.commit()
-
-        # ⭐️ [แก้ไข] ⭐️ เพิ่ม user_id=current_user.id
         entry1 = CycleHistory(start_date=prev_start_str, user_id=current_user.id)
         entry2 = CycleHistory(start_date=last_start_str, user_id=current_user.id)
         db.session.add_all([entry1, entry2])
         db.session.commit()
-
         avg_length = get_average_cycle_length()
-        
         ovulation_date = last_start + timedelta(days=14) 
         next_date = last_start + timedelta(days=avg_length)
-
         entry2.ovulation_date = ovulation_date.strftime('%Y-%m-%d')
         entry2.next_date = next_date.strftime('%Y-%m-%d')
         db.session.commit()
-
         return jsonify({"status": "success", "message": "บันทึกข้อมูลตั้งต้นสำเร็จ"})
-
     except Exception as e:
         print(f"❌ เกิดข้อผิดพลาดใน /api/initial_setup: {e}")
         db.session.rollback()
         return jsonify({"status": "error", "message": str(e)}), 500
-# --- สิ้นสุด API ---
-
-
-# --- ⭐️ Route ใหม่สำหรับ Auth ⭐️ ---
 @app.route('/login', methods=['GET', 'POST'])
 def login():
-    # ถ้า Login อยู่แล้ว ให้เด้งไปหน้า Home
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-
     if request.method == 'POST':
         username = request.form.get('username')
         password = request.form.get('password')
-        
         if not username or not password:
             flash('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน', 'warning')
             return redirect(url_for('login'))
-            
         user = User.query.filter_by(username=username).first()
-        
-        # ตรวจสอบว่า user มีจริง และ รหัสผ่านตรงกัน
         if user and bcrypt.check_password_hash(user.password_hash, password):
-            login_user(user) # สั่งให้ Flask-Login จำไว้ว่าคนนี้ Login แล้ว
+            login_user(user) 
             print(f"✅ User {username} ล็อกอินสำเร็จ")
             return redirect(url_for('home'))
         else:
             flash('ชื่อผู้ใช้หรือรหัสผ่านไม่ถูกต้อง', 'danger')
             return redirect(url_for('login'))
-
     return render_template('login.html')
-
 @app.route('/register', methods=['POST'])
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
-        
     username = request.form.get('username')
     password = request.form.get('password')
-
     if not username or not password:
         flash('กรุณากรอกชื่อผู้ใช้และรหัสผ่าน', 'warning')
         return redirect(url_for('login'))
-
-    # ตรวจสอบว่ามีชื่อนี้ในระบบหรือยัง
     existing_user = User.query.filter_by(username=username).first()
     if existing_user:
         flash('ชื่อผู้ใช้นี้ถูกใช้งานแล้ว', 'danger')
         return redirect(url_for('login'))
-        
-    # เข้ารหัสผ่าน
     hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-    
-    # สร้าง User ใหม่
     new_user = User(username=username, password_hash=hashed_password)
     db.session.add(new_user)
     db.session.commit()
-    
     print(f"✅ User {username} สมัครสมาชิกสำเร็จ")
     flash('สมัครสมาชิกสำเร็จ! กรุณาเข้าสู่ระบบ', 'success')
     return redirect(url_for('login'))
-
 @app.route('/logout')
 @login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))
-# --- ⭐️ สิ้นสุด Route ใหม่สำหรับ Auth ⭐️ ---
 
 
 # --- Route แสดงหน้าเว็บ (⭐️ แก้ไข ⭐️) ---
 @app.route('/')
-@login_required # ⭐️ [เพิ่ม] ⭐️
+@login_required 
 def home():
     """แสดงหน้าแรก (home.html)"""
     return render_template('home.html')
 
-@app.route('/dashboard')
-@login_required # ⭐️ [เพิ่ม] ⭐️
-def dashboard():
-    """แสดงหน้าปฏิทิน (dashboard.html)"""
-    return render_template('dashboard.html')
+# ⭐️ [ลบ Route นี้] ⭐️
+# @app.route('/dashboard')
+# @login_required 
+# def dashboard():
+#    """แสดงหน้าปฏิทิน (dashboard.html)"""
+#    return render_template('dashboard.html')
 
 @app.route('/show_result')
-@login_required # ⭐️ [เพิ่ม] ⭐️
+@login_required 
 def show_result_page():
     """แสดงหน้าผลการวิเคราะห์"""
     return render_template('result_page.html')
 
-# (Route /calendar ถูกลบไปแล้ว)
-
-# (Route /login ย้ายไปอยู่ข้างบนแล้ว)
-
 if __name__ == '__main__':
-    # เมื่อรันบนเครื่องตัวเอง (Local)
     app.run(debug=True, port=5000)
