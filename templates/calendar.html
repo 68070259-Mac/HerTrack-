@@ -152,6 +152,19 @@
             padding-bottom: 5px;
             margin-bottom: 10px;
         }
+
+        /* ⭐️ [เพิ่ม CSS ส่วนนี้] ⭐️ */
+        .from-btn {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            /* margin-top: 15px; (ไม่จำเป็นถ้าอยู่ใน card ที่มี padding) */
+            background-color: #ffb6c1;
+            color: #d6336c;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
     </style>
 
 </head>
@@ -190,6 +203,10 @@
         <div id="analysisResult" class="button-card">
             <h4>ข้อมูลรอบเดือนที่คำนวณล่าสุด</h4>
             <p id="periodInfo">กรุณากลับไปที่หน้า Home เพื่อคำนวณข้อมูลรอบเดือน</p>
+        </div>
+
+        <div class="button-card">
+            <a href="/" class="from-btn">🏠 กลับหน้าหลัก</a>
         </div>
 
     </div>
