@@ -185,8 +185,8 @@ def get_events_data():
                 "title": "🥚 วันตกไข่ (คาดการณ์)",
                 "start": cycle.ovulation_date,
                 "color": "#D4EDDA",
-                "textColor": "#155724",️
-                "borderColor": "#C3E6CB",️
+                "textColor": "#155724",
+                "borderColor": "#C3E6CB",
                 "display": "block"      
             })
         if cycle.next_date:
