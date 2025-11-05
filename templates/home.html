@@ -1,43 +1,345 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="th">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Period Tracker - Home</title>
-  
-  <link rel="style" href="/static/style.css" />
-  
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Period Tracker - Home</title>
+    
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+        
+    <style>
+        /* CSS ส่วนที่จำเป็นต้องใส่ในไฟล์นี้ (สามารถย้ายไป style.css ได้ถ้าต้องการ) */
+        @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
+
+        body {
+            padding-top: 50px; 
+            padding-bottom: 70px;
+            margin: 0;
+            font-family: 'Kanit', sans-serif;
+            background-color: #d5e5f3; /* สีพื้นหลังสมมติ */
+            color: #333333;
+            /* ⭐️ [แก้ไข] ⭐️ */
+            background-image: url({{ url_for('static', filename='bg.jpg') }});
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+        }
+        .top-nav {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            display: flex;
+            justify-content: flex-start;
+            background-color: #b0d3f2;
+            border-bottom: 1px solid #b0d3f2;
+            padding: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+            z-index: 1000;
+            gap: 20px;
+        }
+        .circle {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            width: 250px;
+            height: 250px;
+            background: linear-gradient(180deg, #fb6a91cd, #b0d3f2c8); 
+            border-radius: 50%;
+            margin: 40px auto 30px;
+            padding: 20px;
+            color: white;
+            text-align: center; 
+        } 
+        .circle.is-period {
+            background: linear-gradient(180deg, #d6336c, #fb6a91);
+        }
+
+        .Period_in {
+            font-size: 1.2em;
+            margin-bottom: 5px;
+            font-weight: 300;
+        }
+        .days {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin: 0;
+        }
+        .date {
+            font-size: 1em;
+            margin-top: 5px;
+        }
+        .button-group {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            padding: 0 20px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .start-btn {
+            padding: 15px;
+            background-color: #d6336c; 
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-family: 'Kanit';
+        }
+        .button-card {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .self-assessment {
+            font-size: 1.1em;
+            font-weight: bold;
+            color: #d6336c;
+            margin-bottom: 5px;
+        }
+        .self-assessment2 {
+            font-size: 0.9em;
+            color: #777;
+            margin: 0;
+        }
+        .from-btn {
+            display: block;
+            text-align: center;
+            padding: 10px;
+            margin-top: 15px;
+            background-color: #ffb6c1;
+            color: #d6336c;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: bold;
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+            background-color: white;
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+        .bottom-nav a {
+            color: #777;
+            text-decoration: none;
+            padding: 10px;
+        }
+        .bottom-nav .active {
+            color: #d6336c;
+            font-weight: bold;
+        }
+        /* --- Style สำหรับ Input ภายใน button-card --- */
+        .button-card label {
+            display: block;
+            margin-top: 10px;
+            font-weight: 600;
+        }
+        .button-card input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            border: 1px solid #ffccd9;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-family: 'Kanit';
+        }
+        /* --- Style สำหรับ div แสดงผลวิเคราะห์ (แท็บวิเคราะห์) --- */
+        #analysisResult {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #fff0f5; 
+            border-radius: 8px;
+            border: 1px solid #ffccd9;
+            line-height: 1.6;
+            font-size: 0.95em;
+        }
+        #analysisResult h4 {
+            color: #d6336c;
+            margin-top: 0;
+            border-bottom: 1px solid #ffccd9;
+            padding-bottom: 5px;
+            margin-bottom: 10px;
+        }
+        /* --- Style สำหรับ Navigation (ถ้าใช้ชื่อไฟล์ calen.html เดิม) --- */
+
+    </style>
 </head>
 <body>
 
-  <nav class="top-nav">
-    <img src="{{ url_for('static', filename='logo.PNG') }}" width="90" alt="Her track logo" style="margin: 5px 20px 5px 20px;" >
-  </nav>
-
+    <nav class="top-nav">
+        <img src="{{ url_for('static', filename='logo.jpg') }}" width="90" alt="Her track logo" style="margin: 5px 20px 5px 20px;" >
+    </nav>
+        
     <div class="circle">
-      <p class="Period_in">Period in</p>
-      <h3 class="days">3 days</h3>
-      <p class="date">Period may start 28th June</p>
+        <p class="Period_in">ประจำเดือนในอีก</p>
+        <h3 class="days">... วัน</h3>
+        <p class="date">รอบเดือนถัดไปจะเริ่ม ...</p>
     </div>
 
-<div class="button-group">
-    <button class="start-btn">Log Period</button>
-    <div class="button-card">
-      <p class="self-assessment">Daily Health Log</p>
-      <p class="self-assessment2">บันทึกอาการทุกวัน! เพื่อดูรูปแบบเฉพาะตัว</p><p class="self-assessment2">และมีข้อมูลพร้อมปรึกษาแพทย์</p>
-      
-      <a href="/dashboard" class="from-btn">Check your symptoms</a> 
+    <div class="button-group">
+        <div class="button-card">
+            <p class="self-assessment">ข้อมูลสำหรับคำนวณ (เพื่อแสดงผล)</p>
+            
+            <label for="lastStart">วันที่เริ่มรอบล่าสุด:</label>
+            <input type="date" id="lastStart" value="2025-10-01"> 
+            
+            <label for="lastEnd">วันที่สิ้นสุดรอบล่าสุด:</label>
+            <input type="date" id="lastEnd" value="2025-10-05">
+            
+            <label for="prevStart">วันที่เริ่มรอบก่อนหน้า:</label>
+            <input type="date" id="prevStart" value="2025-09-17"> 
+            
+            <button onclick="updatePeriodInfo()" class="start-btn" style="margin-top: 15px;">คำนวณ & อัปเดตข้อมูล</button>
+            
+            <div id="analysisResult">
+                </div>
+            
+        </div>
+
+        <div class="button-card">
+            <p class="self-assessment" style="color: #6c7d9c;">📅 ดูปฏิทินคาดการณ์รอบเดือน </p>
+            <p class="self-assessment2">ปฏิทินรอบเดือน วางแผนล่วงหน้าสูงสุด 5 รอบเดือนพร้อมไฮไลท์วันสำคัญ</p>
+            
+            <a href="/calendar" class="from-btn">ดูปฏิทิน</a> 
+        </div>
+        <div class="button-card">
+            <p class="self-assessment" style="color: #6c7d9c;" >📝บันทึกสุขภาพประจำวัน</p>
+            <p class="self-assessment2">บันทึกอาการทุกวัน! เพื่อดูรูปแบบเฉพาะตัว และมีข้อมูลพร้อมปรึกษาแพทย์</p>
+            
+            <a href="/dashboard" class="from-btn">ตรวจสอบอาการ</a> 
+        </div>
     </div>
-</div>
 
-    </div>
 
-  <nav class="bottom-nav">
-    <a href="/" class="active">Home</a>
-    <a href="#">Tracker</a>
-    <a href="#">Profile</a>
-  </nav>
+    <script>
+        // (JavaScript ไม่ต้องแก้ไข)
+        const thaiMonths = [
+            "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
+            "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
+        ];
 
+        function formatThaiDate(date) {
+            const d = date.getDate();
+            const m = thaiMonths[date.getMonth()];
+            const y = date.getFullYear() + 543; 
+            return `${d} ${m} ${y}`;
+        }
+
+        function updatePeriodInfo() {
+            const oneDay = 1000 * 60 * 60 * 24;
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); 
+
+            const lastStartDateStr = document.getElementById("lastStart").value;
+            const lastEndDateStr = document.getElementById("lastEnd").value;
+            const prevStartDateStr = document.getElementById("prevStart").value;
+            const analysisResultDiv = document.getElementById("analysisResult");
+            const circleDiv = document.querySelector(".circle"); 
+
+            if (!lastStartDateStr || !lastEndDateStr || !prevStartDateStr) {
+                document.querySelector(".days").textContent = "N/A";
+                document.querySelector(".date").textContent = "กรุณาใส่ข้อมูล";
+                analysisResultDiv.innerHTML = ``; 
+                circleDiv.classList.remove('is-period');
+                localStorage.removeItem('lastStart');
+                return;
+            }
+
+            const lastStart = new Date(lastStartDateStr);
+            const lastEnd = new Date(lastEndDateStr);
+            const prevStart = new Date(prevStartDateStr);
+
+            const periodDays = Math.floor((lastEnd - lastStart) / oneDay) + 1;
+            const cycleDays = Math.floor((lastStart - prevStart) / oneDay);
+            
+            if (cycleDays <= 0 || periodDays <= 0) {
+                const errorMsg = `<h3>⚠️ วันที่ใส่ไม่ถูกต้อง</h3>กรุณาตรวจสอบวันที่เริ่มต้นและสิ้นสุดให้ถูกต้อง`;
+                document.querySelector(".days").textContent = "ผิดพลาด";
+                document.querySelector(".date").textContent = "ตรวจสอบวันที่";
+                analysisResultDiv.innerHTML = `<span style="color: red;">${errorMsg}</span>`;
+                circleDiv.classList.remove('is-period');
+                localStorage.removeItem('lastStart');
+                return;
+            }
+
+            let nextPeriodDate = new Date(lastStart);
+            nextPeriodDate.setDate(nextPeriodDate.getDate() + cycleDays);
+            
+            const isDuringPeriod = (today >= lastStart && today <= lastEnd);
+            
+            if (isDuringPeriod) {
+                const periodDayNumber = Math.floor((today - lastStart) / oneDay) + 1;
+                document.querySelector(".Period_in").textContent = `คุณกำลังเป็น`;
+                document.querySelector(".days").textContent = `ประจำเดือน`;
+                document.querySelector(".date").textContent = `วันที่ ${periodDayNumber} จาก ${periodDays} วัน`;
+                circleDiv.classList.add('is-period'); 
+                
+                while (nextPeriodDate < today) {
+                    nextPeriodDate.setDate(nextPeriodDate.getDate() + cycleDays);
+                }
+            } else {
+                while (nextPeriodDate < today) {
+                    nextPeriodDate.setDate(nextPeriodDate.getDate() + cycleDays);
+                }
+                
+                const daysUntil = Math.floor((nextPeriodDate - today) / oneDay);
+                
+                document.querySelector(".Period_in").textContent = `ประจำเดือนในอีก`;
+                document.querySelector(".days").textContent = `${daysUntil} วัน`;
+                document.querySelector(".date").textContent = `รอบเดือนถัดไปจะเริ่มประมาณ ${formatThaiDate(nextPeriodDate)}`;
+                circleDiv.classList.remove('is-period');
+            }
+            
+            localStorage.setItem('lastStart', lastStartDateStr);
+            localStorage.setItem('lastEnd', lastEndDateStr);
+            localStorage.setItem('prevStart', prevStartDateStr);
+            localStorage.setItem('periodDays', periodDays); 
+            localStorage.setItem('cycleDays', cycleDays); 
+            localStorage.setItem('nextPeriodDate', nextPeriodDate.toISOString().split('T')[0]);
+
+            const ovulation = new Date(nextPeriodDate);
+            ovulation.setDate(ovulation.getDate() - 14); 
+            const fertileStart = new Date(ovulation);
+            fertileStart.setDate(fertileStart.getDate() - 5);
+            const fertileEnd = new Date(ovulation); 
+
+            let cycleStatus = (21 <= cycleDays && cycleDays <= 35) ? "✅ รอบเดือนปกติ (21-35 วัน)" : 
+                              (cycleDays < 21) ? "⚠️ รอบเดือนสั้นกว่าปกติ (< 21 วัน)" : "⚠️ รอบเดือนยาวกว่าปกติ (> 35 วัน)";
+
+            let periodStatus = (3 <= periodDays && periodDays <= 7) ? "✅ การมีประจำเดือนปกติ (3-7 วัน)" : 
+                               (periodDays < 3) ? "⚠️ ประจำเดือนมาสั้นผิดปกติ (< 3 วัน)" : "⚠️ ประจำเดือนมานานกว่าปกติ (> 7 วัน)";
+
+            analysisResultDiv.innerHTML = `
+                <h4>ผลการวิเคราะห์รอบเดือน</h4>
+                🔹 **รอบเดือนยาว**: ${cycleDays} วัน (${cycleStatus})<br>
+                🔹 **มีประจำเดือน**: ${periodDays} วัน (${periodStatus})<br>
+                ---<br>
+                🔹 **วันตกไข่ประมาณ**: ${formatThaiDate(ovulation)}<br>
+                🔹 **ช่วงเจริญพันธุ์**: ${formatThaiDate(fertileStart)} ถึง ${formatThaiDate(fertileEnd)}
+            `;
+        }
+
+        function goToCalendar() {
+            if (localStorage.getItem('lastStart')) {
+                // ⭐️ [แก้ไขลิงก์นี้ (จากครั้งก่อน)] ⭐️
+                window.location.href = '/calendar'; 
+            } else {
+                alert('กรุณากรอกข้อมูลรอบเดือนและกด "คำนวณ & อัปเดตข้อมูล" ก่อนดูปฏิทิน');
+            }
+        }
+
+        window.onload = function() {
+            updatePeriodInfo();
+        };
+
+    </script>
 </body>
 </html>

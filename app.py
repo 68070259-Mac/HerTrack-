@@ -1,4 +1,4 @@
-# 📄 app.py (V5.4 - Auto Cycle Calculation, Home page enabled)
+# 📄 app.py (V5.5 - Vercel Fix)
 
 import os
 import datetime
@@ -6,8 +6,18 @@ from datetime import timedelta
 from flask import Flask, request, jsonify, render_template
 from flask_sqlalchemy import SQLAlchemy
 
-app = Flask(__name__)
+# ⭐️ [แก้ไขจุดที่ 1] ⭐️
+# ย้าย basedir ขึ้นมาก่อน
 basedir = os.path.abspath(os.path.dirname(__file__))
+
+# ⭐️ [แก้ไขจุดที่ 2] ⭐️
+# บอก Flask ชัดเจนว่า static และ templates อยู่ที่ไหน
+app = Flask(__name__,
+            static_folder=os.path.join(basedir, 'static'),
+            template_folder=os.path.join(basedir, 'templates'))
+
+# ⭐️ [แก้ไขจุดที่ 3] ⭐️
+# (บรรทัด basedir เดิมที่อยู่ตรงนี้ ถูกย้ายไปข้างบนแล้ว)
 
 # --- Database Config (เหมือนเดิม) ---
 # NOTE: Using PostgreSQL for Vercel deployment
@@ -288,6 +298,12 @@ def dashboard():
 def show_result_page():
     """แสดงหน้าผลการวิเคราะห์"""
     return render_template('result_page.html')
+
+# ⭐️⭐️⭐️ [เพิ่มส่วนนี้] ⭐️⭐️⭐️
+@app.route('/calendar')
+def calendar_page():
+    """แสดงหน้าปฏิทิน (calendar.html)"""
+    return render_template('calendar.html')
 
 # --- Login page route (หากต้องการใช้) ---
 @app.route('/login')

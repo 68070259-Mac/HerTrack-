@@ -11,17 +11,25 @@
   
   <style>
     /* ... (CSS ทั้งหมดยังคงเหมือนเดิม) ... */
+    @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
+
     @keyframes slideUpFadeIn {
       from { opacity: 0; transform: translateY(15px); }
       to { opacity: 1; transform: translateY(0); }
     }
     body {
-      font-family: 'Nunito Sans', sans-serif;
-      background: linear-gradient(180deg, #FAFDFF 0%, #FFF6F8 100%);
-      color: #333; margin: 0; padding: 16px;
-      padding-bottom: 80px; 
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+      padding-top: 50px; 
+      padding-bottom: 70px;
+      margin: 0;
+      font-family: 'Kanit', sans-serif;
+      background-color: #d5e5f3;
+      color: #333333;
+      /* ⭐️ [แก้ไข] ⭐️ */
+      background-image: url({{ url_for('static', filename='bg.jpg') }});
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
     }
     h1 {
       color: #FB6A90; text-align: center;
@@ -236,6 +244,7 @@
   </div>
 
   <script>
+    // (JavaScript ไม่ต้องแก้ไข)
     document.addEventListener('DOMContentLoaded', function() {
       const calendarEl = document.getElementById('calendar');
       const logSection = document.getElementById('log-section');
@@ -341,7 +350,6 @@
             calendar.removeAllEventSources(); 
             calendar.addEventSource(data.new_events);
             calendar.refetchEvents();
-            // ⭐️ ลิงก์นี้ถูกต้อง (ไปหน้า result_page ที่ /show_result)
             window.location.href = `/show_result?date=${selectedDateStr}`;
           } else alert('บันทึกไม่สำเร็จ: ' + data.message);
         })
@@ -350,10 +358,6 @@
     });
   </script>
 
-  <nav class="bottom-nav">
-    <a href="/">Home</a>
-    <a href="/dashboard" class="active">ปฏิทิน</a>
-  </nav>
 
 </body>
 </html>
