@@ -8,8 +8,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
 from flask_bcrypt import Bcrypt
 
-# (ส่วน Config, Models, และฟังก์ชันคำนวณส่วนใหญ่ เหมือน V7.0)
-# ... (ย่อโค้ดส่วนบน) ...
 basedir = os.path.abspath(os.path.dirname(__file__))
 app = Flask(__name__,
             static_folder=os.path.join(basedir, 'static'),
@@ -186,18 +184,18 @@ def get_events_data():
             events.append({
                 "title": "🥚 วันตกไข่ (คาดการณ์)",
                 "start": cycle.ovulation_date,
-                "color": "#D4EDDA",      # ⭐️ [แก้ไข] ⭐️ เปลี่ยนเป็นสีเขียว
-                "textColor": "#155724",  # ⭐️ [แก้ไข] ⭐️
-                "borderColor": "#C3E6CB",# ⭐️ [แก้ไข] ⭐️
+                "color": "#D4EDDA",
+                "textColor": "#155724",️
+                "borderColor": "#C3E6CB",️
                 "display": "block"      
             })
         if cycle.next_date:
             events.append({
                 "title": "🩸 รอบถัดไป (คาดการณ์)",
                 "start": cycle.next_date,
-                "color": "#FABAC6",      # ⭐️ [แก้ไข] ⭐️ เปลี่ยนเป็นสีแดงอ่อน (โทนเดียวกับ 'น้อย')
-                "textColor": "#333",     # ⭐️ [แก้ไข] ⭐️
-                "borderColor": "#F08080",# ⭐️ [แก้ไข] ⭐️
+                "color": "#FABAC6",      
+                "textColor": "#333",     
+                "borderColor": "#F08080",
                 "display": "block"
             })
     return events
@@ -269,10 +267,9 @@ def analyze_day():
         "self_care_tip": self_care_tip, "doctor_advice": advice_list
     })
 
-# --- ⭐️ [แก้ไข] API สำหรับหน้า Home ⭐️ ---
-@app.route('/api/get_home_summary') # ⭐️ [แก้ไข] ⭐️ เปลี่ยนชื่อ Route
+@app.route('/api/get_home_summary')
 @login_required 
-def get_home_summary(): # ⭐️ [แก้ไข] ⭐️ เปลี่ยนชื่อฟังก์ชัน
+def get_home_summary():
     """
     ดึงข้อมูลสรุปทั้งหมดสำหรับหน้า Home (V7.3)
     """
@@ -280,10 +277,8 @@ def get_home_summary(): # ⭐️ [แก้ไข] ⭐️ เปลี่ยน�
         latest_cycle = CycleHistory.query.filter_by(user_id=current_user.id).order_by(CycleHistory.start_date.desc()).first()
         
         if latest_cycle and latest_cycle.next_date:
-            # ⭐️ [เพิ่ม] ⭐️ ดึงค่าเฉลี่ยมาด้วย
             avg_length = get_average_cycle_length()
             
-            # ⭐️ [แก้ไข] ⭐️ ส่ง JSON ที่มีข้อมูลครบถ้วน
             return jsonify({
                 "status": "success",
                 "last_start_date": latest_cycle.start_date,
@@ -292,13 +287,13 @@ def get_home_summary(): # ⭐️ [แก้ไข] ⭐️ เปลี่ยน�
                 "next_date": latest_cycle.next_date 
             })
         else:
-            return jsonify({"status": "no_data"}) # ⭐️ [แก้ไข] ⭐️ ไม่ต้องส่ง next_date: None
+            return jsonify({"status": "no_data"})
             
     except Exception as e:
         print(f"❌ เกิดข้อผิดพลาดใน /api/get_home_summary: {e}")
         return jsonify({"status": "error", "message": str(e)})
 
-# --- API สำหรับตั้งค่าเริ่มต้น (เหมือนเดิม) ---
+
 @app.route('/api/initial_setup', methods=['POST'])
 @login_required 
 def initial_setup():
@@ -375,19 +370,13 @@ def logout():
     return redirect(url_for('login'))
 
 
-# --- Route แสดงหน้าเว็บ (⭐️ แก้ไข ⭐️) ---
 @app.route('/')
 @login_required 
 def home():
     """แสดงหน้าแรก (home.html)"""
     return render_template('home.html')
 
-# ⭐️ [ลบ Route นี้] ⭐️
-# @app.route('/dashboard')
-# @login_required 
-# def dashboard():
-#    """แสดงหน้าปฏิทิน (dashboard.html)"""
-#    return render_template('dashboard.html')
+
 
 @app.route('/show_result')
 @login_required 
