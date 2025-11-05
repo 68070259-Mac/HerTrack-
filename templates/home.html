@@ -8,17 +8,16 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
         
     <style>
-        /* CSS ส่วนที่จำเป็นต้องใส่ในไฟล์นี้ (สามารถย้ายไป style.css ได้ถ้าต้องการ) */
+        /* (CSS ส่วนใหญ่เหมือนเดิม) */
         @import url('https://fonts.googleapis.com/css2?family=Kanit:wght@400;600;700&display=swap');
 
         body {
-            padding-top: 50px; 
+            padding-top: 80px; /* ⭐️ [แก้ไข] ⭐️ เพิ่ม padding ด้านบนเล็กน้อย */
             padding-bottom: 70px;
             margin: 0;
             font-family: 'Kanit', sans-serif;
-            background-color: #d5e5f3; /* สีพื้นหลังสมมติ */
+            background-color: #d5e5f3; 
             color: #333333;
-            /* ⭐️ [แก้ไข] ⭐️ */
             background-image: url({{ url_for('static', filename='bg.jpg') }});
             background-size: cover;
             background-position: center;
@@ -31,6 +30,7 @@
             width: 100%;
             display: flex;
             justify-content: flex-start;
+            align-items: center; /* ⭐️ [เพิ่ม] ⭐️ */
             background-color: #b0d3f2;
             border-bottom: 1px solid #b0d3f2;
             padding: 5px;
@@ -38,6 +38,33 @@
             z-index: 1000;
             gap: 20px;
         }
+        /* ⭐️ [เพิ่ม CSS ส่วนนี้] ⭐️ */
+        .user-info {
+            margin-left: auto; /* ดันไปทางขวาสุด */
+            padding-right: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 600;
+            color: #333;
+            font-size: 0.9em;
+        }
+        .logout-btn {
+            background: #FB6A90;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-size: 0.9em;
+            transition: background 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+        .logout-btn:hover {
+            background: #d6336c;
+        }
+        /* ⭐️ [สิ้นสุด CSS ส่วนที่เพิ่ม] ⭐️ */
+
         .circle {
             display: flex;
             flex-direction: column;
@@ -78,16 +105,6 @@
             max-width: 400px;
             margin: 0 auto;
         }
-        .start-btn {
-            padding: 15px;
-            background-color: #d6336c; 
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-size: 1.1em;
-            cursor: pointer;
-            font-family: 'Kanit';
-        }
         .button-card {
             background-color: white;
             padding: 20px;
@@ -116,33 +133,17 @@
             border-radius: 8px;
             font-weight: bold;
         }
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            width: 100%;
-            background-color: white;
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 4px rgba(0,0,0,0.1);
-            z-index: 1000;
+        #setup-card {
+            display: none; 
+            border: 2px dashed #d6336c;
+            background-color: #fff0f5;
         }
-        .bottom-nav a {
-            color: #777;
-            text-decoration: none;
-            padding: 10px;
-        }
-        .bottom-nav .active {
-            color: #d6336c;
-            font-weight: bold;
-        }
-        /* --- Style สำหรับ Input ภายใน button-card --- */
-        .button-card label {
+        #setup-card label {
             display: block;
             margin-top: 10px;
             font-weight: 600;
         }
-        .button-card input[type="date"] {
+        #setup-card input[type="date"] {
             width: 100%;
             padding: 8px;
             margin-top: 5px;
@@ -151,76 +152,77 @@
             box-sizing: border-box;
             font-family: 'Kanit';
         }
-        /* --- Style สำหรับ div แสดงผลวิเคราะห์ (แท็บวิเคราะห์) --- */
-        #analysisResult {
-            margin-top: 20px;
+        #saveInitialDataButton {
+            width: 100%;
             padding: 15px;
-            background-color: #fff0f5; 
-            border-radius: 8px;
-            border: 1px solid #ffccd9;
-            line-height: 1.6;
-            font-size: 0.95em;
+            background-color: #d6336c; 
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            font-family: 'Kanit';
+            margin-top: 15px;
         }
-        #analysisResult h4 {
+        #setup-message {
+            font-size: 0.9em;
             color: #d6336c;
-            margin-top: 0;
-            border-bottom: 1px solid #ffccd9;
-            padding-bottom: 5px;
-            margin-bottom: 10px;
+            text-align: center;
+            display: none;
         }
-        /* --- Style สำหรับ Navigation (ถ้าใช้ชื่อไฟล์ calen.html เดิม) --- */
-
     </style>
 </head>
 <body>
 
     <nav class="top-nav">
         <img src="{{ url_for('static', filename='logo.jpg') }}" width="90" alt="Her track logo" style="margin: 5px 20px 5px 20px;" >
+        
+        <!-- ⭐️ [เพิ่ม HTML ส่วนนี้] ⭐️ -->
+        <div class="user-info">
+            <span>สวัสดี, <strong>{{ current_user.username }}</strong>!</span>
+            <a href="{{ url_for('logout') }}" class="logout-btn">ออกจากระบบ</a>
+        </div>
+        <!-- ⭐️ สิ้นสุดส่วนที่เพิ่ม ⭐️ -->
     </nav>
         
     <div class="circle">
         <p class="Period_in">ประจำเดือนในอีก</p>
         <h3 class="days">... วัน</h3>
-        <p class="date">รอบเดือนถัดไปจะเริ่ม ...</p>
+        <p class="date">... กำลังโหลดข้อมูล ...</p>
     </div>
 
     <div class="button-group">
-        <div class="button-card">
-            <p class="self-assessment">ข้อมูลสำหรับคำนวณ (เพื่อแสดงผล)</p>
+        
+        <!-- ฟอร์มตั้งค่าเริ่มต้น (ซ่อนไว้) -->
+        <div id="setup-card" class="button-card">
+            <p class="self-assessment">⭐️ ตั้งค่าครั้งแรก</p>
+            <p class="self-assessment2">
+                ไม่พบข้อมูลในระบบ กรุณากรอกข้อมูล 2 รอบเดือนล่าสุดเพื่อเริ่มการคำนวณ
+            </p>
             
-            <label for="lastStart">วันที่เริ่มรอบล่าสุด:</label>
-            <input type="date" id="lastStart" value="2025-10-01"> 
+            <label for="initialLastStart">วันที่เริ่มรอบล่าสุด:</label>
+            <input type="date" id="initialLastStart"> 
             
-            <label for="lastEnd">วันที่สิ้นสุดรอบล่าสุด:</label>
-            <input type="date" id="lastEnd" value="2025-10-05">
+            <label for="initialPrevStart">วันที่เริ่มรอบก่อนหน้า:</label>
+            <input type="date" id="initialPrevStart"> 
             
-            <label for="prevStart">วันที่เริ่มรอบก่อนหน้า:</label>
-            <input type="date" id="prevStart" value="2025-09-17"> 
-            
-            <button onclick="updatePeriodInfo()" class="start-btn" style="margin-top: 15px;">คำนวณ & อัปเดตข้อมูล</button>
-            
-            <div id="analysisResult">
-                </div>
-            
+            <button id="saveInitialDataButton">บันทึกข้อมูลตั้งต้น</button>
+            <p id="setup-message"></p>
         </div>
 
+
+        <!-- ปุ่มหลัก (เหมือนเดิม) -->
         <div class="button-card">
-            <p class="self-assessment" style="color: #6c7d9c;">📅 ดูปฏิทินคาดการณ์รอบเดือน </p>
-            <p class="self-assessment2">ปฏิทินรอบเดือน วางแผนล่วงหน้าสูงสุด 5 รอบเดือนพร้อมไฮไลท์วันสำคัญ</p>
+            <p class="self-assessment" style="color: #6c7d9c;">📅 ดูปฏิทินและบันทึกอาการ</p>
+            <p class="self-assessment2">ปฏิทินรอบเดือน (ของจริง) และบันทึกอาการรายวัน</p>
             
-            <a href="/calendar" class="from-btn">ดูปฏิทิน</a> 
+            <a href="/dashboard" class="from-btn">ดูปฏิทิน / บันทึกอาการ</a> 
         </div>
-        <div class="button-card">
-            <p class="self-assessment" style="color: #6c7d9c;" >📝บันทึกสุขภาพประจำวัน</p>
-            <p class="self-assessment2">บันทึกอาการทุกวัน! เพื่อดูรูปแบบเฉพาะตัว และมีข้อมูลพร้อมปรึกษาแพทย์</p>
-            
-            <a href="/dashboard" class="from-btn">ตรวจสอบอาการ</a> 
-        </div>
+
     </div>
 
-
+    <!-- (JavaScript ทั้งหมดเหมือนเดิม) -->
     <script>
-        // (JavaScript ไม่ต้องแก้ไข)
         const thaiMonths = [
             "มกราคม", "กุมภาพันธ์", "มีนาคม", "เมษายน", "พฤษภาคม", "มิถุนายน",
             "กรกฎาคม", "สิงหาคม", "กันยายน", "ตุลาคม", "พฤศจิกายน", "ธันวาคม"
@@ -233,112 +235,100 @@
             return `${d} ${m} ${y}`;
         }
 
-        function updatePeriodInfo() {
-            const oneDay = 1000 * 60 * 60 * 24;
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); 
+        function loadHomeSummary() {
+            const daysEl = document.querySelector(".days");
+            const dateEl = document.querySelector(".date");
+            const periodInEl = document.querySelector(".Period_in");
+            const circleDiv = document.querySelector(".circle");
+            const setupCard = document.getElementById('setup-card');
 
-            const lastStartDateStr = document.getElementById("lastStart").value;
-            const lastEndDateStr = document.getElementById("lastEnd").value;
-            const prevStartDateStr = document.getElementById("prevStart").value;
-            const analysisResultDiv = document.getElementById("analysisResult");
-            const circleDiv = document.querySelector(".circle"); 
+            fetch('/api/get_next_period')
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success' && data.next_date) {
+                        
+                        const nextPeriodDate = new Date(data.next_date);
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
 
-            if (!lastStartDateStr || !lastEndDateStr || !prevStartDateStr) {
-                document.querySelector(".days").textContent = "N/A";
-                document.querySelector(".date").textContent = "กรุณาใส่ข้อมูล";
-                analysisResultDiv.innerHTML = ``; 
-                circleDiv.classList.remove('is-period');
-                localStorage.removeItem('lastStart');
+                        const oneDay = 1000 * 60 * 60 * 24;
+                        const daysUntil = Math.ceil((nextPeriodDate - today) / oneDay);
+
+                        if (daysUntil <= 0) {
+                            periodInEl.textContent = `ถึงกำหนดรอบเดือน`;
+                            daysEl.textContent = `วันนี้`;
+                            dateEl.textContent = `(หรือเลยกำหนด ${Math.abs(daysUntil)} วัน)`;
+                            circleDiv.classList.add('is-period'); 
+                        } else {
+                            periodInEl.textContent = `ประจำเดือนในอีก`;
+                            daysEl.textContent = `${daysUntil} วัน`;
+                            dateEl.textContent = `รอบเดือนถัดไปจะเริ่ม ${formatThaiDate(nextPeriodDate)}`;
+                            circleDiv.classList.remove('is-period');
+                        }
+                        
+                        setupCard.style.display = 'none';
+
+                    } else if (data.status === 'no_data') {
+                        periodInEl.textContent = `ไม่พบข้อมูล`;
+                        daysEl.textContent = `N/A`;
+                        dateEl.textContent = `กรุณาตั้งค่าข้อมูลครั้งแรกด้านล่าง`;
+                        setupCard.style.display = 'block';
+                    }
+                })
+                .catch(err => {
+                    console.error("Error fetching home summary:", err);
+                    periodInEl.textContent = `เกิดข้อผิดพลาด`;
+                    daysEl.textContent = `❌`;
+                    dateEl.textContent = `ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้`;
+                });
+        }
+        
+        function saveInitialData() {
+            const lastStart = document.getElementById('initialLastStart').value;
+            const prevStart = document.getElementById('initialPrevStart').value;
+            const msgEl = document.getElementById('setup-message');
+
+            if (!lastStart || !prevStart) {
+                msgEl.textContent = "กรุณากรอกข้อมูลให้ครบทั้ง 2 ช่อง";
+                msgEl.style.display = 'block';
                 return;
             }
 
-            const lastStart = new Date(lastStartDateStr);
-            const lastEnd = new Date(lastEndDateStr);
-            const prevStart = new Date(prevStartDateStr);
+            msgEl.textContent = "กำลังบันทึก...";
+            msgEl.style.display = 'block';
 
-            const periodDays = Math.floor((lastEnd - lastStart) / oneDay) + 1;
-            const cycleDays = Math.floor((lastStart - prevStart) / oneDay);
-            
-            if (cycleDays <= 0 || periodDays <= 0) {
-                const errorMsg = `<h3>⚠️ วันที่ใส่ไม่ถูกต้อง</h3>กรุณาตรวจสอบวันที่เริ่มต้นและสิ้นสุดให้ถูกต้อง`;
-                document.querySelector(".days").textContent = "ผิดพลาด";
-                document.querySelector(".date").textContent = "ตรวจสอบวันที่";
-                analysisResultDiv.innerHTML = `<span style="color: red;">${errorMsg}</span>`;
-                circleDiv.classList.remove('is-period');
-                localStorage.removeItem('lastStart');
-                return;
-            }
-
-            let nextPeriodDate = new Date(lastStart);
-            nextPeriodDate.setDate(nextPeriodDate.getDate() + cycleDays);
-            
-            const isDuringPeriod = (today >= lastStart && today <= lastEnd);
-            
-            if (isDuringPeriod) {
-                const periodDayNumber = Math.floor((today - lastStart) / oneDay) + 1;
-                document.querySelector(".Period_in").textContent = `คุณกำลังเป็น`;
-                document.querySelector(".days").textContent = `ประจำเดือน`;
-                document.querySelector(".date").textContent = `วันที่ ${periodDayNumber} จาก ${periodDays} วัน`;
-                circleDiv.classList.add('is-period'); 
-                
-                while (nextPeriodDate < today) {
-                    nextPeriodDate.setDate(nextPeriodDate.getDate() + cycleDays);
+            fetch('/api/initial_setup', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    lastStartDate: lastStart,
+                    prevStartDate: prevStart
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    msgEl.textContent = "บันทึกสำเร็จ! กำลังรีโหลดหน้า...";
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500); 
+                } else {
+                    msgEl.textContent = `ผิดพลาด: ${data.message}`;
                 }
-            } else {
-                while (nextPeriodDate < today) {
-                    nextPeriodDate.setDate(nextPeriodDate.getDate() + cycleDays);
-                }
-                
-                const daysUntil = Math.floor((nextPeriodDate - today) / oneDay);
-                
-                document.querySelector(".Period_in").textContent = `ประจำเดือนในอีก`;
-                document.querySelector(".days").textContent = `${daysUntil} วัน`;
-                document.querySelector(".date").textContent = `รอบเดือนถัดไปจะเริ่มประมาณ ${formatThaiDate(nextPeriodDate)}`;
-                circleDiv.classList.remove('is-period');
-            }
-            
-            localStorage.setItem('lastStart', lastStartDateStr);
-            localStorage.setItem('lastEnd', lastEndDateStr);
-            localStorage.setItem('prevStart', prevStartDateStr);
-            localStorage.setItem('periodDays', periodDays); 
-            localStorage.setItem('cycleDays', cycleDays); 
-            localStorage.setItem('nextPeriodDate', nextPeriodDate.toISOString().split('T')[0]);
-
-            const ovulation = new Date(nextPeriodDate);
-            ovulation.setDate(ovulation.getDate() - 14); 
-            const fertileStart = new Date(ovulation);
-            fertileStart.setDate(fertileStart.getDate() - 5);
-            const fertileEnd = new Date(ovulation); 
-
-            let cycleStatus = (21 <= cycleDays && cycleDays <= 35) ? "✅ รอบเดือนปกติ (21-35 วัน)" : 
-                              (cycleDays < 21) ? "⚠️ รอบเดือนสั้นกว่าปกติ (< 21 วัน)" : "⚠️ รอบเดือนยาวกว่าปกติ (> 35 วัน)";
-
-            let periodStatus = (3 <= periodDays && periodDays <= 7) ? "✅ การมีประจำเดือนปกติ (3-7 วัน)" : 
-                               (periodDays < 3) ? "⚠️ ประจำเดือนมาสั้นผิดปกติ (< 3 วัน)" : "⚠️ ประจำเดือนมานานกว่าปกติ (> 7 วัน)";
-
-            analysisResultDiv.innerHTML = `
-                <h4>ผลการวิเคราะห์รอบเดือน</h4>
-                🔹 **รอบเดือนยาว**: ${cycleDays} วัน (${cycleStatus})<br>
-                🔹 **มีประจำเดือน**: ${periodDays} วัน (${periodStatus})<br>
-                ---<br>
-                🔹 **วันตกไข่ประมาณ**: ${formatThaiDate(ovulation)}<br>
-                🔹 **ช่วงเจริญพันธุ์**: ${formatThaiDate(fertileStart)} ถึง ${formatThaiDate(fertileEnd)}
-            `;
+            })
+            .catch(err => {
+                msgEl.textContent = "ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้";
+                console.error("Error saving initial data:", err);
+            });
         }
 
-        function goToCalendar() {
-            if (localStorage.getItem('lastStart')) {
-                // ⭐️ [แก้ไขลิงก์นี้ (จากครั้งก่อน)] ⭐️
-                window.location.href = '/calendar'; 
-            } else {
-                alert('กรุณากรอกข้อมูลรอบเดือนและกด "คำนวณ & อัปเดตข้อมูล" ก่อนดูปฏิทิน');
+        window.addEventListener('DOMContentLoaded', () => {
+            loadHomeSummary();
+            const saveBtn = document.getElementById('saveInitialDataButton');
+            if (saveBtn) {
+                saveBtn.addEventListener('click', saveInitialData);
             }
-        }
-
-        window.onload = function() {
-            updatePeriodInfo();
-        };
+        });
 
     </script>
 </body>

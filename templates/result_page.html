@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>💖 ผลการวิเคราะห์ (V5.0)</title>
+  <title>💖 ผลการวิเคราะห์ (V7.0)</title>
   
   <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
   <style>
-    /* (คัดลอก CSS ทั้งหมดจาก result.html V1 มาวางที่นี่) */
+    /* (CSS ทั้งหมดเหมือนเดิม) */
     :root {
       --bg-gradient: linear-gradient(180deg, #FFF9FB 0%, #FFF5F7 100%);
       --card-bg: #FFFFFF;
@@ -92,6 +92,11 @@
       color: white; font-weight: 700; border: none; border-radius: 12px;
       cursor: pointer; font-size: 1.1rem; text-align: center;
       text-decoration: none; margin-top: 24px;
+      box-sizing: border-box; /* ⭐️ [เพิ่ม] ⭐️ */
+      transition: all 0.2s ease; /* ⭐️ [เพิ่ม] ⭐️ */
+    }
+    .back-button:hover {
+        opacity: 0.9;
     }
   </style>
 </head>
@@ -124,12 +129,16 @@
       <p id="doctor-advice"></p>
     </div>
 
-    <a href="/" class="back-button">กลับไปหน้าปฏิทิน</a>
+    <!-- ⭐️ [แก้ไขปุ่ม] ⭐️ -->
+    <a href="{{ url_for('dashboard') }}" class="back-button">กลับไปหน้าปฏิทิน</a>
+    <!-- ⭐️ [เพิ่มปุ่ม] ⭐️ -->
+    <a href="{{ url_for('logout') }}" class="back-button" style="background: linear-gradient(90deg, #aaa, #888); margin-top: 10px;">ออกจากระบบ</a>
+
   </div>
 
   <script>
     window.addEventListener('DOMContentLoaded', () => {
-      // 1. ดึง Element ต่างๆ
+      // (JavaScript ทั้งหมดเหมือนเดิม)
       const preloader = document.getElementById('preloader');
       const mainCard = document.getElementById('main-card');
       const encouragementEl = document.getElementById('encouragement');
@@ -141,26 +150,20 @@
       const doctorAdviceEl = document.getElementById('doctor-advice');
       const doctorSectionEl = document.getElementById('doctor-section');
 
-      // 2. (ใหม่!) หาวันที่ (date) จาก URL
-      // (เช่น /show_result?date=2025-11-01)
       const params = new URLSearchParams(window.location.search);
       const date = params.get('date');
 
       if (!date) {
-        // ถ้าไม่มี date ใน URL, แสดงข้อผิดพลาด
         encouragementEl.textContent = '❌ ไม่พบวันที่! กรุณากลับไปบันทึกก่อนค่ะ';
         return;
       }
 
-      // 3. (ใหม่!) ยิง API ไปที่ /api/analyze เพื่อดึงข้อมูลของวันนั้น
       fetch(`/api/analyze?date=${date}`)
         .then(res => res.json())
         .then(data => {
           if (data.status === 'success') {
-            // 4. (ใหม่!) เมื่อได้ข้อมูล JSON, นำมาแสดงผล
             mascotEl.textContent = data.mascot;
             healthScoreEl.textContent = data.health_score;
-            // หน่วงเวลาเล็กน้อยเพื่อให้เห็น animation
             setTimeout(() => {
                 healthProgressEl.style.width = data.health_score + '%';
             }, 100);
@@ -176,14 +179,12 @@
               doctorSectionEl.style.display = 'block';
             }
 
-            // 5. ซ่อน Preloader และแสดงการ์ด
             preloader.style.opacity = '0';
             preloader.style.pointerEvents = 'none';
             mainCard.style.visibility = 'visible';
             mainCard.style.animation = 'popIn 0.6s cubic-bezier(0.68, -0.55, 0.27, 1.55)';
 
           } else {
-            // (ถ้าไม่พบข้อมูลของวันนั้น)
             encouragementEl.textContent = `❌ ไม่พบข้อมูลของวันที่ ${date}`;
           }
         })
